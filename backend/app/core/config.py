@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     dataset_output_dir: str = Field(
         default="datasets/processed", validation_alias="DATASET_OUTPUT_DIR"
     )
+    model_artifact_dir: str = Field(default="ml/artifacts", validation_alias="MODEL_ARTIFACT_DIR")
+    model_registry_stage: str = Field(
+        default="Development", validation_alias="MODEL_REGISTRY_STAGE"
+    )
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
 

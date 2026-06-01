@@ -39,6 +39,7 @@ docker compose --profile ml run --rm ml
 - Folder structure in `docs/folder-structure.md`.
 - Development roadmap in `docs/roadmap.md`.
 - Data engineering plan and commands in `docs/data-engineering.md`.
+- Machine learning layer guide in `docs/machine-learning.md`.
 - PostgreSQL schema and Supabase migrations in `infra/supabase/migrations`.
 - Supabase notes in `docs/database/supabase-schema.md`.
 - ERD in `docs/diagrams/er-diagram.mmd`.
@@ -76,3 +77,14 @@ Generated datasets:
 - `datasets/processed/undercut_dataset.parquet`
 - `datasets/processed/overcut_dataset.parquet`
 - `datasets/processed/tyre_dataset.parquet`
+
+## Machine Learning
+
+Train models after datasets exist:
+
+```bash
+f1-train-models --model all --dataset-dir datasets/processed --artifact-dir ml/artifacts
+```
+
+The training layer produces MLflow runs, evaluation dashboards, SHAP reports, model
+artifacts, and a local model registry.

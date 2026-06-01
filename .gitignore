@@ -28,6 +28,8 @@ datasets/external/*
 !datasets/external/.gitkeep
 
 mlruns/
+ml/artifacts/
+datasets/reports/
 *.parquet
 *.pkl
 *.joblib

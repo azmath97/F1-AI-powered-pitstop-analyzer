@@ -20,10 +20,10 @@ In the current scaffold, computation endpoints return `501 Not Implemented`.
 | GET | `/api/v1/sessions/{session_id}/laps` | Fetch lap records |
 | GET | `/api/v1/sessions/{session_id}/telemetry` | Fetch telemetry samples |
 | GET | `/api/v1/strategy/command-center` | Command center aggregate contract |
-| POST | `/api/v1/predictions/undercut` | Request undercut prediction |
-| POST | `/api/v1/predictions/overcut` | Request overcut prediction |
-| POST | `/api/v1/predictions/tyres` | Request tyre health prediction |
-| POST | `/api/v1/simulations` | Request simulation run |
+| POST | `/api/v1/predictions/undercut` | Predict calibrated undercut success probability |
+| POST | `/api/v1/predictions/overcut` | Predict calibrated overcut success probability |
+| POST | `/api/v1/predictions/tyres` | Predict tyre remaining useful life |
+| POST | `/api/v1/simulations/strategy` | Run Monte Carlo strategy simulation |
 
 ## Response Conventions
 
@@ -32,4 +32,5 @@ In the current scaffold, computation endpoints return `501 Not Implemented`.
 - Probabilities are decimal values between `0` and `1`.
 - Percentages are decimal values between `0` and `100`.
 - API errors use FastAPI's standard JSON error shape.
-- Prediction responses include model name, model version, confidence, feature snapshot, and SHAP values.
+- Prediction responses include model name, model version, confidence, and feature snapshot.
+- Inference endpoints return `503` when trained model artifacts are not registered yet.

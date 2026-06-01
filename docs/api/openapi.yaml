@@ -109,33 +109,33 @@ paths:
           description: Strategy aggregation is not implemented in the scaffold
   /api/v1/predictions/undercut:
     post:
-      summary: Request undercut prediction
+      summary: Predict undercut success probability
       responses:
-        "202":
-          description: Prediction accepted
-        "501":
-          description: Undercut model inference is not implemented in the scaffold
+        "200":
+          description: Calibrated undercut probability
+        "503":
+          description: Model artifact is not registered
   /api/v1/predictions/overcut:
     post:
-      summary: Request overcut prediction
+      summary: Predict overcut success probability
       responses:
-        "202":
-          description: Prediction accepted
-        "501":
-          description: Overcut model inference is not implemented in the scaffold
+        "200":
+          description: Calibrated overcut probability
+        "503":
+          description: Model artifact is not registered
   /api/v1/predictions/tyres:
     post:
-      summary: Request tyre prediction
+      summary: Predict tyre remaining useful life
       responses:
-        "202":
-          description: Prediction accepted
-        "501":
-          description: Tyre model inference is not implemented in the scaffold
-  /api/v1/simulations:
+        "200":
+          description: Tyre remaining useful life prediction
+        "503":
+          description: Model artifact is not registered
+  /api/v1/simulations/strategy:
     post:
-      summary: Request simulation run
+      summary: Run Monte Carlo strategy simulation
       responses:
-        "202":
-          description: Simulation accepted
-        "501":
-          description: Simulation execution is not implemented in the scaffold
+        "200":
+          description: Strategy simulation result
+        "503":
+          description: Required model artifact is not registered

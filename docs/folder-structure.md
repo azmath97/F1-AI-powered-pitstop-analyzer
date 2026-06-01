@@ -28,6 +28,7 @@ f1-strategy-intelligence-engine/
     database/               PostgreSQL and Supabase schema documentation
     diagrams/               Mermaid ERD
     data-engineering.md     ETL, validation, and dataset-generation guide
+    machine-learning.md     Training, inference, registry, and simulator guide
   infra/                    Docker, Supabase migrations, seed scripts, operations helpers
     supabase/migrations/    SQL migrations
     supabase/seed/          Deterministic demo seed data

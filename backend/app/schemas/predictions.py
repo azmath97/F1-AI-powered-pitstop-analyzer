@@ -27,3 +27,19 @@ class TyrePredictionRequest(PredictionBaseRequest):
 class PredictionAccepted(BaseModel):
     request_id: UUID
     status: str
+
+
+class TyrePredictionResponse(BaseModel):
+    model_name: str
+    model_version: str
+    remaining_laps: float
+    confidence: float = Field(ge=0, le=1)
+    feature_snapshot: dict[str, Any] = Field(default_factory=dict)
+
+
+class StrategyProbabilityResponse(BaseModel):
+    model_name: str
+    model_version: str
+    probability: float = Field(ge=0, le=1)
+    confidence: float = Field(ge=0, le=1)
+    feature_snapshot: dict[str, Any] = Field(default_factory=dict)
