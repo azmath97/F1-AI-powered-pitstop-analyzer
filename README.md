@@ -1,8 +1,8 @@
-# F1 Strategy Intelligence Engine
+# StintSync
 
-Production-ready project foundation for an AI-powered Formula 1 strategy intelligence platform.
+AI-Powered Formula 1 Strategy & Race Intelligence Platform.
 
-The PRD calls for pit-window optimization, undercut and overcut intelligence, tyre degradation forecasting, race simulations, safety-car scenarios, explainable AI, telemetry analytics, and interactive circuit analysis. This repository sets up the architecture, schemas, API contracts, and runtime scaffolding for those modules without implementing ML models or strategy business logic yet.
+StintSync is a professional motorsport strategy workstation for pit-window optimization, undercut and overcut intelligence, tyre degradation forecasting, race simulations, safety-car scenarios, explainable AI, telemetry analytics, live race monitoring, and interactive circuit analysis.
 
 ## Stack
 
@@ -48,17 +48,16 @@ docker compose --profile ml run --rm ml
 - API specification in `docs/api`.
 - Backend, frontend, ML, datasets, notebooks, docs, and infra directories.
 - Unit test structure for backend, frontend, and ML.
+- Dynamic season, race, and session selection designed to surface 2025, 2026, and future seasons whenever data exists.
+- Live race mode with a typed OpenF1-ready API contract, React Query polling, live telemetry panels, live position tracking, and strategy confidence visualizations.
+- Race replay, drivers intelligence, teams intelligence, and circuits intelligence workspaces.
 
 ## Implementation Boundary
 
-This scaffold intentionally does not implement:
+Initial scaffold boundaries:
 
-- ML training or inference.
-- Strategy recommendations.
-- Race simulation business logic.
-- Data ingestion from FastF1 or OpenF1.
-
-Those pieces belong in the next phases once contracts and persistence are stable.
+- The live endpoint currently exposes a stable contract with fixture projection so OpenF1 streaming can be swapped in without frontend changes.
+- Strategy UI surfaces consume typed mock/projection data until production model outputs and live data jobs are connected.
 
 ## Data Engineering
 

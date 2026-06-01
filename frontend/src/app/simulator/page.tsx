@@ -5,7 +5,9 @@ import { downloadCsv } from "@/components/charts/plotly-chart";
 import {
   PitWindowHeatmap,
   PositionDistributionChart,
-  SimulationHistogram
+  SimulationHistogram,
+  StrategyConfidenceBands,
+  TrackPositionProjection
 } from "@/components/charts/motorsport-charts";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -31,6 +33,14 @@ export default function SimulatorPage() {
           <Metric label="Confidence" value="87%" />
           <Metric label="Risk" value="23%" />
         </div>
+      </div>
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <ChartPanel title="Track Position Projection" onCsv={() => downloadCsv("sim-track-projection.csv", pitWindowHeatmap)}>
+          <TrackPositionProjection cells={pitWindowHeatmap} />
+        </ChartPanel>
+        <ChartPanel title="Strategy Confidence Bands" onCsv={() => downloadCsv("sim-confidence.csv", pitWindowHeatmap)}>
+          <StrategyConfidenceBands cells={pitWindowHeatmap} />
+        </ChartPanel>
       </div>
     </AppShell>
   );

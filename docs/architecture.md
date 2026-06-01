@@ -2,9 +2,9 @@
 
 ## Product Boundary
 
-The foundation supports the PRD for an F1 Strategy Intelligence Engine: interactive strategy analysis, pit-window optimization, tyre degradation intelligence, undercut and overcut prediction records, race simulations, explainability artifacts, telemetry analytics, and circuit analysis.
+The foundation supports StintSync, an AI-Powered Formula 1 Strategy & Race Intelligence Platform: interactive strategy analysis, pit-window optimization, tyre degradation intelligence, undercut and overcut prediction records, race simulations, explainability artifacts, telemetry analytics, live race monitoring, race replay, and circuit analysis.
 
-This scaffold intentionally does not implement ML models or business strategy logic. It defines the contracts, layers, schemas, and runtime shape needed to implement those modules safely.
+The scaffold defines the contracts, layers, schemas, and runtime shape needed to implement those modules safely. Live OpenF1 integration is exposed through a typed contract that can be backed by fixture projection locally and streaming data in production.
 
 ## High-Level Architecture
 
@@ -62,4 +62,3 @@ Infrastructure:
 - Ingestion jobs should be idempotent using external source keys where available.
 - Telemetry can be partitioned by `session_id` or time later if row volume requires it.
 - Every model-serving endpoint should expose confidence, explanation metadata, and input feature snapshots.
-

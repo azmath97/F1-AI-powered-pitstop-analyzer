@@ -2,11 +2,17 @@
 
 import { ChartPanel } from "@/components/charts/chart-panel";
 import { downloadCsv } from "@/components/charts/plotly-chart";
-import { ProbabilityGauge, ShapImportance, ShapWaterfall } from "@/components/charts/motorsport-charts";
+import {
+  HistoricalScenarioExplorer,
+  ProbabilityGauge,
+  ShapImportance,
+  ShapWaterfall,
+  TrackPositionProjection
+} from "@/components/charts/motorsport-charts";
 import { StrategyTable } from "@/components/strategy/strategy-table";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { shapFeatures } from "@/lib/mock-data";
+import { pitWindowHeatmap, scenarioMatches, shapFeatures } from "@/lib/mock-data";
 
 export default function UndercutPage() {
   return (
@@ -24,7 +30,15 @@ export default function UndercutPage() {
         <ChartPanel title="SHAP Waterfall">
           <ShapWaterfall features={shapFeatures} />
         </ChartPanel>
-        <StrategyTable title="Historical Similar Situations" />
+        <ChartPanel title="Track Position Projection" onCsv={() => downloadCsv("undercut-track-projection.csv", pitWindowHeatmap)}>
+          <TrackPositionProjection cells={pitWindowHeatmap} />
+        </ChartPanel>
+      </div>
+      <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_0.8fr]">
+        <ChartPanel title="Historical Similar Scenario Explorer" onCsv={() => downloadCsv("undercut-scenarios.csv", scenarioMatches)}>
+          <HistoricalScenarioExplorer scenarios={scenarioMatches} />
+        </ChartPanel>
+        <StrategyTable title="Strategy Comparison Table" />
       </div>
     </AppShell>
   );

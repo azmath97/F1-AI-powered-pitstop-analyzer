@@ -1,8 +1,8 @@
 # Backend
 
-FastAPI service scaffold for the F1 Strategy Intelligence Engine.
+FastAPI service scaffold for StintSync.
 
-The backend currently defines route groups, Pydantic contracts, configuration, database session wiring, and test structure. Strategy logic, ML inference, simulation execution, and ingestion are intentionally deferred.
+The backend defines route groups, Pydantic contracts, configuration, database session wiring, live-session contracts, and test structure. Production OpenF1 streaming, strategy logic, ML inference, and simulation execution can be attached behind these contracts.
 
 ## Run Locally
 
@@ -16,4 +16,3 @@ uvicorn app.main:app --reload
 ```bash
 pytest backend/tests
 ```
-

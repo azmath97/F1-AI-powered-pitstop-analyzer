@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: F1 Strategy Intelligence Engine API
+  title: StintSync API
   version: 0.1.0
-  description: API contract scaffold for the F1 strategy platform.
+  description: API contract scaffold for the AI-Powered Formula 1 Strategy & Race Intelligence Platform.
 servers:
   - url: http://localhost:8000
 paths:
@@ -24,6 +24,13 @@ paths:
       responses:
         "200":
           description: Team list
+  /api/v1/live/session:
+    get:
+      summary: Get live race session snapshot
+      description: OpenF1-ready projection for live race mode, refreshed by frontend clients every five seconds.
+      responses:
+        "200":
+          description: Live race telemetry, strategy recommendation, and driver position snapshot
   /api/v1/circuits:
     get:
       summary: List circuits

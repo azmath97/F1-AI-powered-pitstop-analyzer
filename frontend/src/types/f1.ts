@@ -17,6 +17,71 @@ export interface CommandCenterSnapshot {
   confidence: number;
 }
 
+export type RaceStatus = "live" | "upcoming" | "completed";
+
+export interface RaceOption {
+  id: string;
+  season: number;
+  round: number;
+  name: string;
+  circuit: string;
+  country: string;
+  status: RaceStatus;
+  sessions: string[];
+}
+
+export interface LiveDriverState {
+  driver: string;
+  team: string;
+  position: number;
+  gapToLeader: number;
+  gapAhead: number | null;
+  tyreCompound: TyreCompound;
+  tyreAge: number;
+  speed: number;
+  throttle: number;
+  brake: number;
+  gear: number;
+  rpm: number;
+  drs: boolean;
+  ers: number;
+  delta: number;
+  x: number;
+  y: number;
+  sector: 1 | 2 | 3;
+}
+
+export interface LiveRaceSnapshot {
+  sessionKey: string;
+  race: string;
+  session: string;
+  status: RaceStatus;
+  currentLap: number;
+  totalLaps: number;
+  trackTempC: number;
+  airTempC: number;
+  rainfall: number;
+  leader: string;
+  selectedDriver: LiveDriverState;
+  drivers: LiveDriverState[];
+  pitRecommendationLap: number;
+  undercutProbability: number;
+  overcutProbability: number;
+  expectedGainSeconds: number;
+  confidence: number;
+  risk: number;
+  updatedAt: string;
+}
+
+export interface ReplayFrame {
+  lap: number;
+  positions: { driver: string; position: number; gap: number }[];
+  tyres: { driver: string; compound: TyreCompound; age: number }[];
+  pitStops: { driver: string; lap: number; stationarySeconds: number }[];
+  weather: { trackTempC: number; airTempC: number; rainfall: number };
+  status: string;
+}
+
 export interface StrategyRecommendation {
   race: string;
   session: string;
@@ -37,7 +102,7 @@ export interface PitWindowCell {
 
 export interface LapEvent {
   lap: number;
-  type: "start" | "pit" | "weather" | "safety-car" | "position";
+  type: "start" | "pit" | "weather" | "safety-car" | "position" | "virtual-safety-car";
   label: string;
   driver: string;
 }
@@ -47,6 +112,11 @@ export interface TelemetryPoint {
   speed: number;
   throttle: number;
   brake: number;
+  gear: number;
+  rpm: number;
+  drs: number;
+  ers: number;
+  delta: number;
   x: number;
   y: number;
 }
@@ -76,4 +146,25 @@ export interface CircuitPoint {
   x: number;
   y: number;
   speed: number;
+}
+
+export interface ScenarioMatch {
+  id: string;
+  race: string;
+  lap: number;
+  compound: TyreCompound;
+  gapSeconds: number;
+  tyreAge: number;
+  similarity: number;
+  outcome: string;
+  gainSeconds: number;
+}
+
+export interface IntelligenceEntity {
+  id: string;
+  name: string;
+  primary: string;
+  secondary: string;
+  score: number;
+  trend: number;
 }

@@ -1,5 +1,5 @@
 {
-  "name": "f1-strategy-intelligence-engine",
+  "name": "stintsync",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -18,4 +18,3 @@
     "npm": ">=10.0.0"
   }
 }
-

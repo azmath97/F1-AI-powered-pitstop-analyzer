@@ -6,7 +6,8 @@ import {
   PitGainCurve,
   ProbabilityGauge,
   ShapImportance,
-  ShapWaterfall
+  ShapWaterfall,
+  StrategyConfidenceBands
 } from "@/components/charts/motorsport-charts";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -30,6 +31,11 @@ export default function OvercutPage() {
         </ChartPanel>
         <ChartPanel title="SHAP Waterfall">
           <ShapWaterfall features={shapFeatures.map((item) => ({ ...item, value: item.value * 0.72 }))} />
+        </ChartPanel>
+      </div>
+      <div className="mt-4">
+        <ChartPanel title="Strategy Confidence Bands" onCsv={() => downloadCsv("overcut-confidence.csv", pitWindowHeatmap)}>
+          <StrategyConfidenceBands cells={pitWindowHeatmap} />
         </ChartPanel>
       </div>
     </AppShell>

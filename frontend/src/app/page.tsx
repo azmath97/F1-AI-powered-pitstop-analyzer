@@ -2,22 +2,30 @@
 
 import { ChartPanel } from "@/components/charts/chart-panel";
 import { downloadCsv } from "@/components/charts/plotly-chart";
-import { PitWindowHeatmap, RaceTimeline } from "@/components/charts/motorsport-charts";
+import {
+  HistoricalScenarioExplorer,
+  PitWindowHeatmap,
+  RaceTimeline,
+  StrategyConfidenceBands
+} from "@/components/charts/motorsport-charts";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { pitWindowHeatmap, raceTimeline, recommendation } from "@/lib/mock-data";
+import { pitWindowHeatmap, raceTimeline, recommendation, scenarioMatches } from "@/lib/mock-data";
 
 export default function DashboardPage() {
   return (
     <AppShell>
-      <PageHeader title="Dashboard" eyebrow="Live strategy command">
-        <div className="font-mono text-xs text-muted-foreground">DATA SOURCE: FASTF1 / OPENF1 SAMPLE</div>
+      <PageHeader title="Dashboard" eyebrow="StintSync command">
+        <div className="font-mono text-xs text-muted-foreground">LIVE READY / FASTF1 + OPENF1</div>
       </PageHeader>
 
       <section className="mb-4 border border-border bg-[#111418]">
         <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
-            <div className="text-xs uppercase tracking-[0.2em] text-primary">Current recommendation</div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+              Current strategy recommendation
+            </div>
             <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <HeroMetric label="Pit Window" value={recommendation.pitWindow} />
               <HeroMetric label="Undercut" value={`${Math.round(recommendation.undercutProbability * 100)}%`} />
@@ -40,12 +48,24 @@ export default function DashboardPage() {
         >
           <PitWindowHeatmap cells={pitWindowHeatmap} height={540} />
         </ChartPanel>
+        <div className="grid gap-4 xl:grid-cols-2">
+          <ChartPanel
+            title="Race Timeline"
+            subtitle="Pit events, safety-car risk, weather shifts, and track-position changes"
+            onCsv={() => downloadCsv("race-timeline.csv", raceTimeline)}
+          >
+            <RaceTimeline events={raceTimeline} />
+          </ChartPanel>
+          <ChartPanel title="Strategy Confidence Bands" onCsv={() => downloadCsv("confidence.csv", pitWindowHeatmap)}>
+            <StrategyConfidenceBands cells={pitWindowHeatmap} />
+          </ChartPanel>
+        </div>
         <ChartPanel
-          title="Race Timeline"
-          subtitle="Pit events, safety-car risk, weather shifts, and track-position changes"
-          onCsv={() => downloadCsv("race-timeline.csv", raceTimeline)}
+          title="Historical Similar Scenario Explorer"
+          subtitle="Track, compound, lap, gap, and tyre-age similarity"
+          onCsv={() => downloadCsv("similar-scenarios.csv", scenarioMatches)}
         >
-          <RaceTimeline events={raceTimeline} />
+          <HistoricalScenarioExplorer scenarios={scenarioMatches} />
         </ChartPanel>
       </div>
     </AppShell>

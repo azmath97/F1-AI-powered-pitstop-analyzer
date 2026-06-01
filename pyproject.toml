@@ -3,9 +3,9 @@ requires = ["setuptools>=70.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "f1-strategy-intelligence-engine"
+name = "stintsync"
 version = "0.1.0"
-description = "Foundation for an F1 strategy intelligence platform with FastAPI, Next.js, PostgreSQL, Supabase, and ML scaffolding."
+description = "AI-Powered Formula 1 Strategy & Race Intelligence Platform with FastAPI, Next.js, PostgreSQL, Supabase, and ML scaffolding."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
