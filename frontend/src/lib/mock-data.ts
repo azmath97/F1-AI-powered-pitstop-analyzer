@@ -16,36 +16,85 @@ import type {
 } from "@/types/f1";
 
 export const raceCatalogue: RaceOption[] = [
-  {
-    id: "2025-british-gp",
+  ...[
+    ["Australian GP", "Albert Park", "Australia"],
+    ["Chinese GP", "Shanghai", "China"],
+    ["Japanese GP", "Suzuka", "Japan"],
+    ["Bahrain GP", "Sakhir", "Bahrain"],
+    ["Saudi Arabian GP", "Jeddah", "Saudi Arabia"],
+    ["Miami GP", "Miami", "United States"],
+    ["Emilia Romagna GP", "Imola", "Italy"],
+    ["Monaco GP", "Monaco", "Monaco"],
+    ["Spanish GP", "Barcelona-Catalunya", "Spain"],
+    ["Canadian GP", "Gilles Villeneuve", "Canada"],
+    ["Austrian GP", "Red Bull Ring", "Austria"],
+    ["British GP", "Silverstone", "United Kingdom"],
+    ["Belgian GP", "Spa-Francorchamps", "Belgium"],
+    ["Hungarian GP", "Hungaroring", "Hungary"],
+    ["Dutch GP", "Zandvoort", "Netherlands"],
+    ["Italian GP", "Monza", "Italy"],
+    ["Azerbaijan GP", "Baku", "Azerbaijan"],
+    ["Singapore GP", "Marina Bay", "Singapore"],
+    ["United States GP", "Circuit of the Americas", "United States"],
+    ["Mexico City GP", "Autodromo Hermanos Rodriguez", "Mexico"],
+    ["Sao Paulo GP", "Interlagos", "Brazil"],
+    ["Las Vegas GP", "Las Vegas Strip", "United States"],
+    ["Qatar GP", "Lusail", "Qatar"],
+    ["Abu Dhabi GP", "Yas Marina", "United Arab Emirates"]
+  ].map(([name, circuitName, country], index) => ({
+    id: `2025-${name.toLowerCase().replaceAll(" ", "-")}`,
     season: 2025,
-    round: 12,
-    name: "British GP",
-    circuit: "Silverstone",
-    country: "United Kingdom",
-    status: "completed",
-    sessions: ["Practice", "Qualifying", "Sprint", "Race"]
-  },
-  {
-    id: "2026-bahrain-gp",
+    round: index + 1,
+    name,
+    circuit: circuitName,
+    country,
+    status: "completed" as const,
+    sessions: name === "Chinese GP" || name === "Miami GP" || name === "Belgian GP" || name === "United States GP" || name === "Qatar GP"
+      ? ["Practice", "Qualifying", "Sprint", "Race"]
+      : ["Practice", "Qualifying", "Race"]
+  })),
+  ...[
+    ["Australian GP", "Albert Park", "Australia", "completed"],
+    ["Chinese GP", "Shanghai", "China", "completed"],
+    ["Japanese GP", "Suzuka", "Japan", "completed"],
+    ["Bahrain GP", "Sakhir", "Bahrain", "completed"],
+    ["Saudi Arabian GP", "Jeddah", "Saudi Arabia", "completed"],
+    ["Monaco GP", "Monaco", "Monaco", "upcoming"]
+  ].map(([name, circuitName, country, status], index) => ({
+    id: `2026-${name.toLowerCase().replaceAll(" ", "-")}`,
     season: 2026,
-    round: 1,
-    name: "Bahrain GP",
-    circuit: "Sakhir",
-    country: "Bahrain",
-    status: "live",
+    round: index + 1,
+    name,
+    circuit: circuitName,
+    country,
+    status: status as "completed" | "upcoming",
     sessions: ["Practice", "Qualifying", "Race"]
-  },
-  {
-    id: "2026-saudi-arabian-gp",
-    season: 2026,
-    round: 2,
-    name: "Saudi Arabian GP",
-    circuit: "Jeddah",
-    country: "Saudi Arabia",
-    status: "upcoming",
-    sessions: ["Practice", "Qualifying", "Race"]
-  }
+  }))
+];
+
+export const driverOptions = [
+  "VER",
+  "TSU",
+  "LEC",
+  "HAM",
+  "NOR",
+  "PIA",
+  "RUS",
+  "ANT",
+  "ALO",
+  "STR",
+  "GAS",
+  "COL",
+  "ALB",
+  "SAI",
+  "HUL",
+  "BOR",
+  "HAD",
+  "LAW",
+  "OCO",
+  "BEA",
+  "BOT",
+  "PER"
 ];
 
 export const recommendation: StrategyRecommendation = {
@@ -141,13 +190,13 @@ export const circuit: CircuitPoint[] = Array.from({ length: 180 }, (_, index) =>
 
 export const liveSnapshot: LiveRaceSnapshot = {
   sessionKey: "openf1-live-2026-bahrain-race",
-  race: "Bahrain GP",
+  race: "Monaco GP",
   session: "Race",
-  status: "live",
-  currentLap: 22,
-  totalLaps: 57,
-  trackTempC: 38,
-  airTempC: 27,
+  status: "upcoming",
+  currentLap: 0,
+  totalLaps: 78,
+  trackTempC: 0,
+  airTempC: 0,
   rainfall: 0,
   leader: "VER",
   pitRecommendationLap: 24,

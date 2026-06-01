@@ -10,13 +10,13 @@ export function LiveRacePanel({ snapshot }: { snapshot: LiveRaceSnapshot }) {
     <section className="border border-border bg-[#111418]">
       <div className="flex items-center justify-between border-b border-border px-3 py-2">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-          Live Session
+          <span className={`h-2 w-2 rounded-full ${snapshot.status === "live" ? "animate-pulse bg-primary" : "bg-[#2f80ed]"}`} />
+          {snapshot.status === "live" ? "Live Session" : "No Live Race"}
         </div>
         <div className="font-mono text-xs text-muted-foreground">{new Date(snapshot.updatedAt).toLocaleTimeString()}</div>
       </div>
       <div className="grid gap-0 md:grid-cols-3 xl:grid-cols-6">
-        <LiveMetric label="Lap" value={`${snapshot.currentLap}/${snapshot.totalLaps}`} />
+        <LiveMetric label="Lap" value={snapshot.status === "live" ? `${snapshot.currentLap}/${snapshot.totalLaps}` : "Pre-race"} />
         <LiveMetric label="Position" value={`P${driver.position}`} />
         <LiveMetric label="Gap Ahead" value={driver.gapAhead === null ? "Leader" : `${driver.gapAhead.toFixed(1)}s`} />
         <LiveMetric label="Tyre" value={`${driver.tyreCompound} ${driver.tyreAge}L`} />

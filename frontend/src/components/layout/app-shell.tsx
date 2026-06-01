@@ -21,7 +21,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { raceCatalogue } from "@/lib/mock-data";
+import { driverOptions, raceCatalogue } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import type { RaceStatus } from "@/types/f1";
 
@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [light, setLight] = useState(false);
   const [season, setSeason] = useState(2026);
   const races = raceCatalogue.filter((race) => race.season === season);
-  const selectedRace = races[0] ?? raceCatalogue[0];
+  const selectedRace = races.find((race) => race.status === "upcoming") ?? races.find((race) => race.status === "live") ?? races[0] ?? raceCatalogue[0];
 
   useEffect(() => {
     document.documentElement.classList.toggle("light", light);
@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div>
                 <div className="text-sm text-muted-foreground">Race Engineering Workspace</div>
                 <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-foreground">
-                  <span>{selectedRace.circuit.toUpperCase()} / RACE / LAP 22</span>
+                  <span>{selectedRace.circuit.toUpperCase()} / RACE / {selectedRace.status === "upcoming" ? "PRE-RACE" : "LAP 22"}</span>
                   <StatusBadge status={selectedRace.status} />
                 </div>
               </div>
@@ -114,8 +114,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   ))}
                 </select>
               </label>
-              <RaceSelect races={races} />
-              <Select label="Driver" values={["NOR", "VER", "LEC"]} />
+              <RaceSelect races={races} selectedRaceId={selectedRace.id} />
+              <Select label="Driver" values={driverOptions} />
               <Select label="Session" values={selectedRace.sessions} />
               <Button
                 variant="outline"
@@ -135,11 +135,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function RaceSelect({ races }: { races: typeof raceCatalogue }) {
+function RaceSelect({ races, selectedRaceId }: { races: typeof raceCatalogue; selectedRaceId: string }) {
   return (
     <label className="grid gap-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
       Race
-      <select className="h-9 min-w-44 border border-border bg-[#111418] px-2 font-mono text-sm text-foreground outline-none focus:border-primary">
+      <select
+        className="h-9 min-w-44 border border-border bg-[#111418] px-2 font-mono text-sm text-foreground outline-none focus:border-primary"
+        defaultValue={selectedRaceId}
+      >
         {races.map((race) => (
           <option key={race.id} value={race.id}>
             {statusLabel(race.status)} {race.name}

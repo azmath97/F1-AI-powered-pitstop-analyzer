@@ -9,7 +9,8 @@ def test_live_session_contract() -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["status"] == "live"
+    assert payload["status"] == "upcoming"
+    assert payload["race"] == "Monaco GP"
     assert payload["selectedDriver"]["driver"] == "NOR"
     assert payload["pitRecommendationLap"] > 0
     assert len(payload["drivers"]) >= 1
