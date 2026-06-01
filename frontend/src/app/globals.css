@@ -3,19 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 18% 97%;
+  --background: 216 18% 5%;
+  --foreground: 210 38% 97%;
+  --card: 216 17% 8%;
+  --card-foreground: 210 38% 97%;
+  --muted: 218 16% 11%;
+  --muted-foreground: 215 14% 65%;
+  --border: 216 16% 17%;
+  --primary: 1 100% 44%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 145 100% 39%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 1 100% 44%;
+  --destructive-foreground: 0 0% 100%;
+  color-scheme: dark;
+}
+
+.light {
+  --background: 210 20% 96%;
   --foreground: 220 18% 12%;
   --card: 0 0% 100%;
   --card-foreground: 220 18% 12%;
   --muted: 214 20% 91%;
   --muted-foreground: 220 10% 42%;
   --border: 214 18% 84%;
-  --primary: 354 78% 47%;
-  --primary-foreground: 0 0% 100%;
-  --accent: 162 72% 36%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 72% 50%;
-  --destructive-foreground: 0 0% 100%;
+  color-scheme: light;
 }
 
 * {
@@ -25,9 +37,18 @@
 body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
+  min-height: 100vh;
 }
 
 .plot-container .main-svg {
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
+::selection {
+  background: #e10600;
+  color: #fff;
+}
+
+.metric-font {
+  font-family: "JetBrains Mono", Consolas, monospace;
+}

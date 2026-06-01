@@ -25,9 +25,13 @@ const config: Config = {
         "destructive-foreground": "hsl(var(--destructive-foreground))"
       },
       borderRadius: {
-        lg: "8px",
-        md: "6px",
-        sm: "4px"
+        lg: "4px",
+        md: "3px",
+        sm: "2px"
+      },
+      fontFamily: {
+        sans: ["Inter", "Geist", "Arial", "sans-serif"],
+        mono: ["JetBrains Mono", "Consolas", "monospace"]
       }
     }
   },
@@ -35,4 +39,3 @@ const config: Config = {
 };
 
 export default config;
-

@@ -1,136 +1,70 @@
-import { Activity, Flag, Gauge, RadioTower, Timer } from "lucide-react";
+"use client";
 
-import { GainCurve } from "@/components/charts/gain-curve";
-import { ProbabilityGauge } from "@/components/charts/probability-gauge";
-import { StrategyHeatmap } from "@/components/charts/strategy-heatmap";
+import { ChartPanel } from "@/components/charts/chart-panel";
+import { downloadCsv } from "@/components/charts/plotly-chart";
+import { PitWindowHeatmap, RaceTimeline } from "@/components/charts/motorsport-charts";
 import { AppShell } from "@/components/layout/app-shell";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import type { CommandCenterSnapshot } from "@/types/f1";
+import { PageHeader } from "@/components/layout/page-header";
+import { pitWindowHeatmap, raceTimeline, recommendation } from "@/lib/mock-data";
 
-const snapshot: CommandCenterSnapshot = {
-  driver: "Lando Norris",
-  team: "McLaren",
-  currentLap: 22,
-  tyreCompound: "Medium",
-  tyreAgeLaps: 22,
-  position: 2,
-  gapAheadMs: 1240,
-  gapBehindMs: 5300,
-  trackConditions: "Dry",
-  pitRecommendationLap: 23,
-  undercutProbability: 0.81,
-  overcutProbability: 0.42,
-  expectedGainMs: 4300,
-  confidence: 0.87
-};
-
-export default function Home() {
+export default function DashboardPage() {
   return (
     <AppShell>
-      <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card>
-          <CardHeader className="flex flex-row items-start justify-between gap-4">
-            <div>
-              <CardTitle>Strategy Command Center</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {snapshot.driver} - {snapshot.team}
-              </p>
-            </div>
-            <Badge>Lap {snapshot.currentLap}</Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Metric icon={Flag} label="Position" value={`P${snapshot.position}`} />
-              <Metric icon={Timer} label="Pit Lap" value={`${snapshot.pitRecommendationLap}`} />
-              <Metric icon={Gauge} label="Tyre" value={`${snapshot.tyreCompound} ${snapshot.tyreAgeLaps}L`} />
-              <Metric icon={RadioTower} label="Track" value={snapshot.trackConditions} />
-            </div>
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              <ProbabilityGauge title="Undercut" value={snapshot.undercutProbability} tone="green" />
-              <ProbabilityGauge title="Overcut" value={snapshot.overcutProbability} tone="amber" />
-              <Card className="bg-muted/40">
-                <CardHeader>
-                  <CardTitle>Confidence</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-semibold">{Math.round(snapshot.confidence * 100)}%</div>
-                  <Progress value={snapshot.confidence * 100} className="mt-4" />
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Expected gain {(snapshot.expectedGainMs / 1000).toFixed(1)}s
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
+      <PageHeader title="Dashboard" eyebrow="Live strategy command">
+        <div className="font-mono text-xs text-muted-foreground">DATA SOURCE: FASTF1 / OPENF1 SAMPLE</div>
+      </PageHeader>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Pit Window Optimizer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StrategyHeatmap />
-          </CardContent>
-        </Card>
+      <section className="mb-4 border border-border bg-[#111418]">
+        <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
+            <div className="text-xs uppercase tracking-[0.2em] text-primary">Current recommendation</div>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <HeroMetric label="Pit Window" value={recommendation.pitWindow} />
+              <HeroMetric label="Undercut" value={`${Math.round(recommendation.undercutProbability * 100)}%`} />
+              <HeroMetric label="Overcut" value={`${Math.round(recommendation.overcutProbability * 100)}%`} />
+              <HeroMetric label="Expected Gain" value={`+${recommendation.expectedGainSeconds.toFixed(1)}s`} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-0">
+            <HeroMetric label="Confidence" value={`${Math.round(recommendation.confidence * 100)}%`} compact />
+            <HeroMetric label="Risk" value={`${Math.round(recommendation.risk * 100)}%`} compact />
+          </div>
+        </div>
       </section>
 
-      <section className="mt-4 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Gain Curve</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <GainCurve />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Tyre Degradation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-[220px_1fr]">
-              <ProbabilityGauge title="Health" value={0.43} tone="red" />
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-3 text-sm">
-                  <span className="text-muted-foreground">Remaining laps</span>
-                  <span className="font-semibold">6.5</span>
-                </div>
-                <div className="flex items-center justify-between border-b pb-3 text-sm">
-                  <span className="text-muted-foreground">Performance loss</span>
-                  <span className="font-semibold">+1.85s</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Traffic risk</span>
-                  <span className="font-semibold">22%</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+      <div className="grid gap-4">
+        <ChartPanel
+          title="Pit Window Heatmap"
+          subtitle="Expected gain and risk by candidate stop lap"
+          onCsv={() => downloadCsv("pit-window.csv", pitWindowHeatmap)}
+        >
+          <PitWindowHeatmap cells={pitWindowHeatmap} height={540} />
+        </ChartPanel>
+        <ChartPanel
+          title="Race Timeline"
+          subtitle="Pit events, safety-car risk, weather shifts, and track-position changes"
+          onCsv={() => downloadCsv("race-timeline.csv", raceTimeline)}
+        >
+          <RaceTimeline events={raceTimeline} />
+        </ChartPanel>
+      </div>
     </AppShell>
   );
 }
 
-function Metric({
-  icon: Icon,
+function HeroMetric({
   label,
-  value
+  value,
+  compact = false
 }: {
-  icon: typeof Activity;
   label: string;
   value: string;
+  compact?: boolean;
 }) {
   return (
-    <div className="rounded-md border bg-muted/30 p-3">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Icon className="h-4 w-4" />
-        {label}
-      </div>
-      <div className="mt-2 text-xl font-semibold">{value}</div>
+    <div className={`border-border ${compact ? "border-l p-4" : ""}`}>
+      <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</div>
+      <div className="metric-font mt-1 text-2xl font-semibold text-foreground">{value}</div>
     </div>
   );
 }

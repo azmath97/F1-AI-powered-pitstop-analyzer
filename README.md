@@ -40,6 +40,8 @@ docker compose --profile ml run --rm ml
 - Development roadmap in `docs/roadmap.md`.
 - Data engineering plan and commands in `docs/data-engineering.md`.
 - Machine learning layer guide in `docs/machine-learning.md`.
+- Deployment guide in `docs/deployment-guide.md`.
+- Production checklist in `docs/production-checklist.md`.
 - PostgreSQL schema and Supabase migrations in `infra/supabase/migrations`.
 - Supabase notes in `docs/database/supabase-schema.md`.
 - ERD in `docs/diagrams/er-diagram.mmd`.
