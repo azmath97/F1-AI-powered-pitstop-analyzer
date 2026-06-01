@@ -1,0 +1,90 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: f1-strategy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-f1_strategy}
+      POSTGRES_USER: ${POSTGRES_USER:-f1_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-f1_app_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/supabase/migrations/0001_initial_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./infra/supabase/seed/0001_seed_demo.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-f1_app} -d ${POSTGRES_DB:-f1_strategy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: f1-strategy-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-f1_app}:${POSTGRES_PASSWORD:-f1_app_password}@postgres:5432/${POSTGRES_DB:-f1_strategy}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./datasets:/app/datasets
+      - fastf1_cache:/app/.cache/fastf1
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: f1-strategy-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.16.2
+    container_name: f1-strategy-mlflow
+    restart: unless-stopped
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+
+  ml:
+    profiles: ["ml"]
+    build:
+      context: .
+      dockerfile: ml/Dockerfile
+    container_name: f1-strategy-ml
+    env_file:
+      - .env
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - ./datasets:/workspace/datasets
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  mlflow_data:
+  fastf1_cache:

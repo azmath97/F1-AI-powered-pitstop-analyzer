@@ -1,0 +1,141 @@
+openapi: 3.1.0
+info:
+  title: F1 Strategy Intelligence Engine API
+  version: 0.1.0
+  description: API contract scaffold for the F1 strategy platform.
+servers:
+  - url: http://localhost:8000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service health
+  /api/v1/drivers:
+    get:
+      summary: List drivers
+      responses:
+        "200":
+          description: Driver list
+  /api/v1/teams:
+    get:
+      summary: List teams
+      responses:
+        "200":
+          description: Team list
+  /api/v1/circuits:
+    get:
+      summary: List circuits
+      responses:
+        "200":
+          description: Circuit list
+  /api/v1/sessions:
+    get:
+      summary: List sessions
+      responses:
+        "200":
+          description: Session list
+  /api/v1/sessions/{session_id}:
+    get:
+      summary: Get session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Session detail
+  /api/v1/sessions/{session_id}/laps:
+    get:
+      summary: List session laps
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lap list
+  /api/v1/sessions/{session_id}/telemetry:
+    get:
+      summary: List session telemetry samples
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: driver_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: lap_number
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Telemetry sample list
+  /api/v1/strategy/command-center:
+    get:
+      summary: Get command center aggregate
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: driver_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Strategy command center aggregate
+        "501":
+          description: Strategy aggregation is not implemented in the scaffold
+  /api/v1/predictions/undercut:
+    post:
+      summary: Request undercut prediction
+      responses:
+        "202":
+          description: Prediction accepted
+        "501":
+          description: Undercut model inference is not implemented in the scaffold
+  /api/v1/predictions/overcut:
+    post:
+      summary: Request overcut prediction
+      responses:
+        "202":
+          description: Prediction accepted
+        "501":
+          description: Overcut model inference is not implemented in the scaffold
+  /api/v1/predictions/tyres:
+    post:
+      summary: Request tyre prediction
+      responses:
+        "202":
+          description: Prediction accepted
+        "501":
+          description: Tyre model inference is not implemented in the scaffold
+  /api/v1/simulations:
+    post:
+      summary: Request simulation run
+      responses:
+        "202":
+          description: Simulation accepted
+        "501":
+          description: Simulation execution is not implemented in the scaffold

@@ -1,0 +1,21 @@
+{
+  "name": "f1-strategy-intelligence-engine",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "docker compose up --build",
+    "dev:frontend": "npm --workspace frontend run dev",
+    "lint:frontend": "npm --workspace frontend run lint",
+    "test:frontend": "npm --workspace frontend run test",
+    "test:backend": "pytest backend/tests",
+    "lint:python": "ruff check backend ml && mypy backend ml"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}
+

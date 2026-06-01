@@ -1,0 +1,24 @@
+erDiagram
+  TEAMS ||--o{ DRIVERS : fields_current_team
+  TEAMS ||--o{ LAPS : fields
+  TEAMS ||--o{ STINTS : runs
+  CIRCUITS ||--o{ SESSIONS : hosts
+  SESSIONS ||--o{ LAPS : records
+  SESSIONS ||--o{ TELEMETRY : samples
+  SESSIONS ||--o{ WEATHER : observes
+  SESSIONS ||--o{ STINTS : contains
+  SESSIONS ||--o{ PIT_STOPS : contains
+  SESSIONS ||--o{ UNDERCUT_PREDICTIONS : produces
+  SESSIONS ||--o{ OVERCUT_PREDICTIONS : produces
+  SESSIONS ||--o{ TYRE_PREDICTIONS : produces
+  SESSIONS ||--o{ SIMULATIONS : runs
+  DRIVERS ||--o{ LAPS : completes
+  DRIVERS ||--o{ TELEMETRY : emits
+  DRIVERS ||--o{ STINTS : drives
+  DRIVERS ||--o{ PIT_STOPS : makes
+  DRIVERS ||--o{ UNDERCUT_PREDICTIONS : candidate
+  DRIVERS ||--o{ OVERCUT_PREDICTIONS : candidate
+  DRIVERS ||--o{ TYRE_PREDICTIONS : owns
+  DRIVERS ||--o{ SIMULATIONS : subject
+  LAPS ||--o{ TELEMETRY : has
+
