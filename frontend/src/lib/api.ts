@@ -85,7 +85,7 @@ const liveRaceSnapshotSchema = z.object({
   sessionKey: z.string(),
   race: z.string(),
   session: z.string(),
-  status: z.enum(["live", "upcoming", "completed"]),
+  status: z.enum(["live", "upcoming", "completed", "cancelled"]),
   currentLap: z.number(),
   totalLaps: z.number(),
   trackTempC: z.number(),

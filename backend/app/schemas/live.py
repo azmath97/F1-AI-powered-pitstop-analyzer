@@ -4,7 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 TyreCompound = Literal["Soft", "Medium", "Hard", "Intermediate", "Wet", "Unknown"]
-RaceStatus = Literal["live", "upcoming", "completed"]
+RaceStatus = Literal["live", "upcoming", "completed", "cancelled"]
 
 
 class LiveDriverState(BaseModel):

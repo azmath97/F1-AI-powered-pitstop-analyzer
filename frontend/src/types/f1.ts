@@ -17,7 +17,7 @@ export interface CommandCenterSnapshot {
   confidence: number;
 }
 
-export type RaceStatus = "live" | "upcoming" | "completed";
+export type RaceStatus = "live" | "upcoming" | "completed" | "cancelled";
 
 export interface RaceOption {
   id: string;
@@ -28,6 +28,9 @@ export interface RaceOption {
   country: string;
   status: RaceStatus;
   sessions: string[];
+  startDate: string;
+  endDate: string;
+  hasTelemetry: boolean;
 }
 
 export interface LiveDriverState {

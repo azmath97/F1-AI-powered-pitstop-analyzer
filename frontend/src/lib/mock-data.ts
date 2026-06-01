@@ -17,31 +17,31 @@ import type {
 
 export const raceCatalogue: RaceOption[] = [
   ...[
-    ["Australian GP", "Albert Park", "Australia"],
-    ["Chinese GP", "Shanghai", "China"],
-    ["Japanese GP", "Suzuka", "Japan"],
-    ["Bahrain GP", "Sakhir", "Bahrain"],
-    ["Saudi Arabian GP", "Jeddah", "Saudi Arabia"],
-    ["Miami GP", "Miami", "United States"],
-    ["Emilia Romagna GP", "Imola", "Italy"],
-    ["Monaco GP", "Monaco", "Monaco"],
-    ["Spanish GP", "Barcelona-Catalunya", "Spain"],
-    ["Canadian GP", "Gilles Villeneuve", "Canada"],
-    ["Austrian GP", "Red Bull Ring", "Austria"],
-    ["British GP", "Silverstone", "United Kingdom"],
-    ["Belgian GP", "Spa-Francorchamps", "Belgium"],
-    ["Hungarian GP", "Hungaroring", "Hungary"],
-    ["Dutch GP", "Zandvoort", "Netherlands"],
-    ["Italian GP", "Monza", "Italy"],
-    ["Azerbaijan GP", "Baku", "Azerbaijan"],
-    ["Singapore GP", "Marina Bay", "Singapore"],
-    ["United States GP", "Circuit of the Americas", "United States"],
-    ["Mexico City GP", "Autodromo Hermanos Rodriguez", "Mexico"],
-    ["Sao Paulo GP", "Interlagos", "Brazil"],
-    ["Las Vegas GP", "Las Vegas Strip", "United States"],
-    ["Qatar GP", "Lusail", "Qatar"],
-    ["Abu Dhabi GP", "Yas Marina", "United Arab Emirates"]
-  ].map(([name, circuitName, country], index) => ({
+    ["Australian GP", "Albert Park", "Australia", "2025-03-14", "2025-03-16"],
+    ["Chinese GP", "Shanghai", "China", "2025-03-21", "2025-03-23"],
+    ["Japanese GP", "Suzuka", "Japan", "2025-04-04", "2025-04-06"],
+    ["Bahrain GP", "Sakhir", "Bahrain", "2025-04-11", "2025-04-13"],
+    ["Saudi Arabian GP", "Jeddah", "Saudi Arabia", "2025-04-18", "2025-04-20"],
+    ["Miami GP", "Miami", "United States", "2025-05-02", "2025-05-04"],
+    ["Emilia Romagna GP", "Imola", "Italy", "2025-05-16", "2025-05-18"],
+    ["Monaco GP", "Monaco", "Monaco", "2025-05-23", "2025-05-25"],
+    ["Spanish GP", "Barcelona-Catalunya", "Spain", "2025-05-30", "2025-06-01"],
+    ["Canadian GP", "Gilles Villeneuve", "Canada", "2025-06-13", "2025-06-15"],
+    ["Austrian GP", "Red Bull Ring", "Austria", "2025-06-27", "2025-06-29"],
+    ["British GP", "Silverstone", "United Kingdom", "2025-07-04", "2025-07-06"],
+    ["Belgian GP", "Spa-Francorchamps", "Belgium", "2025-07-25", "2025-07-27"],
+    ["Hungarian GP", "Hungaroring", "Hungary", "2025-08-01", "2025-08-03"],
+    ["Dutch GP", "Zandvoort", "Netherlands", "2025-08-29", "2025-08-31"],
+    ["Italian GP", "Monza", "Italy", "2025-09-05", "2025-09-07"],
+    ["Azerbaijan GP", "Baku", "Azerbaijan", "2025-09-19", "2025-09-21"],
+    ["Singapore GP", "Marina Bay", "Singapore", "2025-10-03", "2025-10-05"],
+    ["United States GP", "Circuit of the Americas", "United States", "2025-10-17", "2025-10-19"],
+    ["Mexico City GP", "Autodromo Hermanos Rodriguez", "Mexico", "2025-10-24", "2025-10-26"],
+    ["Sao Paulo GP", "Interlagos", "Brazil", "2025-11-07", "2025-11-09"],
+    ["Las Vegas GP", "Las Vegas Strip", "United States", "2025-11-20", "2025-11-22"],
+    ["Qatar GP", "Lusail", "Qatar", "2025-11-28", "2025-11-30"],
+    ["Abu Dhabi GP", "Yas Marina", "United Arab Emirates", "2025-12-05", "2025-12-07"]
+  ].map(([name, circuitName, country, startDate, endDate], index) => ({
     id: `2025-${name.toLowerCase().replaceAll(" ", "-")}`,
     season: 2025,
     round: index + 1,
@@ -49,53 +49,66 @@ export const raceCatalogue: RaceOption[] = [
     circuit: circuitName,
     country,
     status: "completed" as const,
+    startDate,
+    endDate,
+    hasTelemetry: false,
     sessions: name === "Chinese GP" || name === "Miami GP" || name === "Belgian GP" || name === "United States GP" || name === "Qatar GP"
       ? ["Practice", "Qualifying", "Sprint", "Race"]
       : ["Practice", "Qualifying", "Race"]
   })),
   ...[
-    ["Australian GP", "Albert Park", "Australia", "completed"],
-    ["Chinese GP", "Shanghai", "China", "completed"],
-    ["Japanese GP", "Suzuka", "Japan", "completed"],
-    ["Bahrain GP", "Sakhir", "Bahrain", "completed"],
-    ["Saudi Arabian GP", "Jeddah", "Saudi Arabia", "completed"],
-    ["Monaco GP", "Monaco", "Monaco", "upcoming"]
-  ].map(([name, circuitName, country, status], index) => ({
+    ["Australian GP", "Albert Park", "Australia", "completed", "2026-03-06", "2026-03-08"],
+    ["Chinese GP", "Shanghai", "China", "completed", "2026-03-13", "2026-03-15"],
+    ["Japanese GP", "Suzuka", "Japan", "completed", "2026-03-27", "2026-03-29"],
+    ["Bahrain GP", "Sakhir", "Bahrain", "cancelled", "2026-04-10", "2026-04-12"],
+    ["Saudi Arabian GP", "Jeddah", "Saudi Arabia", "cancelled", "2026-04-17", "2026-04-19"],
+    ["Miami GP", "Miami", "United States", "completed", "2026-05-01", "2026-05-03"],
+    ["Canadian GP", "Gilles Villeneuve", "Canada", "completed", "2026-05-22", "2026-05-24"],
+    ["Monaco GP", "Monaco", "Monaco", "upcoming", "2026-06-05", "2026-06-07"]
+  ].map(([name, circuitName, country, status, startDate, endDate], index) => ({
     id: `2026-${name.toLowerCase().replaceAll(" ", "-")}`,
     season: 2026,
     round: index + 1,
     name,
     circuit: circuitName,
     country,
-    status: status as "completed" | "upcoming",
+    status: status as "completed" | "upcoming" | "cancelled",
+    startDate,
+    endDate,
+    hasTelemetry: false,
     sessions: ["Practice", "Qualifying", "Race"]
   }))
 ];
 
-export const driverOptions = [
-  "VER",
-  "TSU",
-  "LEC",
-  "HAM",
-  "NOR",
-  "PIA",
-  "RUS",
-  "ANT",
-  "ALO",
-  "STR",
-  "GAS",
-  "COL",
-  "ALB",
-  "SAI",
-  "HUL",
-  "BOR",
-  "HAD",
-  "LAW",
-  "OCO",
-  "BEA",
-  "BOT",
-  "PER"
-];
+const driversBySeason: Record<number, string[]> = {
+  2025: ["VER", "TSU", "LEC", "HAM", "NOR", "PIA", "RUS", "ANT", "ALO", "STR", "GAS", "DOO", "ALB", "SAI", "HUL", "BOR", "HAD", "LAW", "OCO", "BEA"],
+  2026: ["NOR", "PIA", "RUS", "ANT", "VER", "HAD", "LEC", "HAM", "ALB", "SAI", "LAW", "LIN", "ALO", "STR", "OCO", "BEA", "HUL", "BOR", "GAS", "COL", "PER", "BOT"]
+};
+
+export function getDriversForSeason(season: number) {
+  return driversBySeason[season] ?? driversBySeason[2026];
+}
+
+export const driverOptions = getDriversForSeason(2026);
+
+export function getRaceById(id: string) {
+  return raceCatalogue.find((race) => race.id === id) ?? raceCatalogue.find((race) => race.status === "upcoming") ?? raceCatalogue[0];
+}
+
+export function getCircuitPointsForRace(raceId: string): CircuitPoint[] {
+  const race = getRaceById(raceId);
+  const seed = Array.from(race.circuit).reduce((total, char) => total + char.charCodeAt(0), 0);
+  return Array.from({ length: 180 }, (_, index) => {
+    const wobble = Math.sin(index / (10 + (seed % 7))) * (12 + (seed % 9));
+    const xRadius = 88 + (seed % 43);
+    const yRadius = 58 + (seed % 29);
+    return {
+      x: Math.cos(index / 28) * (xRadius + wobble),
+      y: Math.sin(index / 28) * (yRadius + Math.cos(index / 17) * (seed % 18)),
+      speed: 120 + Math.sin(index / (7 + (seed % 5))) * 65
+    };
+  });
+}
 
 export const recommendation: StrategyRecommendation = {
   race: "British Grand Prix",

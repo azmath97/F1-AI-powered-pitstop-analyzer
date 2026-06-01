@@ -11,6 +11,7 @@ import {
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { LiveRacePanel, LiveTelemetryStrip } from "@/components/live/live-race-panel";
+import { EmptyState } from "@/components/states/empty-state";
 import { useLiveRace } from "@/hooks/use-live-race";
 import { pitWindowHeatmap } from "@/lib/mock-data";
 
@@ -27,23 +28,32 @@ export default function LiveRacePage() {
       ) : (
         <div className="grid gap-4">
           <LiveRacePanel snapshot={snapshot} />
-          <LiveTelemetryStrip snapshot={snapshot} />
-          <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-            <ChartPanel title="Live Position Tracker" subtitle="Track map with leader and selected-driver emphasis" onCsv={() => downloadCsv("live-position.csv", snapshot.drivers)}>
-              <LivePositionTracker drivers={snapshot.drivers} />
-            </ChartPanel>
-            <div className="grid gap-4">
-              <ChartPanel title="Track Position Projection" onCsv={() => downloadCsv("track-projection.csv", pitWindowHeatmap)}>
-                <TrackPositionProjection cells={pitWindowHeatmap} />
+          {snapshot.status !== "live" ? (
+            <EmptyState
+              title="No race is live"
+              description="OpenF1 live telemetry panels stay disabled until an active session is detected. Upcoming races should not show speed, throttle, brake, gaps, or pit calls."
+            />
+          ) : (
+            <>
+              <LiveTelemetryStrip snapshot={snapshot} />
+              <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+                <ChartPanel title="Live Position Tracker" subtitle="Track map with leader and selected-driver emphasis" onCsv={() => downloadCsv("live-position.csv", snapshot.drivers)}>
+                  <LivePositionTracker drivers={snapshot.drivers} />
+                </ChartPanel>
+                <div className="grid gap-4">
+                  <ChartPanel title="Track Position Projection" onCsv={() => downloadCsv("track-projection.csv", pitWindowHeatmap)}>
+                    <TrackPositionProjection cells={pitWindowHeatmap} />
+                  </ChartPanel>
+                  <ChartPanel title="Strategy Confidence Bands" onCsv={() => downloadCsv("confidence-bands.csv", pitWindowHeatmap)}>
+                    <StrategyConfidenceBands cells={pitWindowHeatmap} />
+                  </ChartPanel>
+                </div>
+              </div>
+              <ChartPanel title="Pit Window Heatmap" subtitle="Live pit lap optimization surface">
+                <PitWindowHeatmap cells={pitWindowHeatmap} height={520} />
               </ChartPanel>
-              <ChartPanel title="Strategy Confidence Bands" onCsv={() => downloadCsv("confidence-bands.csv", pitWindowHeatmap)}>
-                <StrategyConfidenceBands cells={pitWindowHeatmap} />
-              </ChartPanel>
-            </div>
-          </div>
-          <ChartPanel title="Pit Window Heatmap" subtitle="Live pit lap optimization surface">
-            <PitWindowHeatmap cells={pitWindowHeatmap} height={520} />
-          </ChartPanel>
+            </>
+          )}
         </div>
       )}
     </AppShell>

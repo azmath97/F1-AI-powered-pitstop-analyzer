@@ -18,10 +18,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { driverOptions, raceCatalogue } from "@/lib/mock-data";
+import { RaceSelectionProvider } from "@/contexts/race-selection-context";
+import { getDriversForSeason, raceCatalogue } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import type { RaceStatus } from "@/types/f1";
 
@@ -44,15 +45,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [light, setLight] = useState(false);
   const [season, setSeason] = useState(2026);
+  const [raceId, setRaceId] = useState<string | undefined>();
+  const [driver, setDriver] = useState("NOR");
+  const [session, setSession] = useState("Race");
   const races = raceCatalogue.filter((race) => race.season === season);
-  const selectedRace = races.find((race) => race.status === "upcoming") ?? races.find((race) => race.status === "live") ?? races[0] ?? raceCatalogue[0];
+  const defaultRace = races.find((race) => race.status === "upcoming") ?? races.find((race) => race.status === "live") ?? races[0] ?? raceCatalogue[0];
+  const selectedRace = races.find((race) => race.id === raceId) ?? defaultRace;
+  const drivers = getDriversForSeason(season);
+  const selection = useMemo(
+    () => ({
+      season,
+      race: selectedRace,
+      driver,
+      session,
+      hasValidatedTelemetry: selectedRace.hasTelemetry && selectedRace.status === "completed"
+    }),
+    [driver, season, selectedRace, session]
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle("light", light);
   }, [light]);
 
+  useEffect(() => {
+    setRaceId(defaultRace.id);
+    setDriver(getDriversForSeason(season)[0] ?? "NOR");
+    setSession(defaultRace.sessions.at(-1) ?? "Race");
+  }, [defaultRace.id, defaultRace.sessions, season]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <RaceSelectionProvider value={selection}>
+      <div className="min-h-screen bg-background text-foreground">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r bg-[#0b0d10] lg:block">
         <div className="border-b border-border px-4 py-4">
           <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
@@ -96,7 +119,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div>
                 <div className="text-sm text-muted-foreground">Race Engineering Workspace</div>
                 <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-foreground">
-                  <span>{selectedRace.circuit.toUpperCase()} / RACE / {selectedRace.status === "upcoming" ? "PRE-RACE" : "LAP 22"}</span>
+                  <span>
+                    {selectedRace.circuit.toUpperCase()} / RACE /{" "}
+                    {selectedRace.status === "cancelled" ? "CANCELLED" : selectedRace.status === "upcoming" ? "PRE-RACE" : "DATA VIEW"}
+                  </span>
                   <StatusBadge status={selectedRace.status} />
                 </div>
               </div>
@@ -114,9 +140,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   ))}
                 </select>
               </label>
-              <RaceSelect races={races} selectedRaceId={selectedRace.id} />
-              <Select label="Driver" values={driverOptions} />
-              <Select label="Session" values={selectedRace.sessions} />
+              <RaceSelect races={races} selectedRaceId={selectedRace.id} onChange={setRaceId} />
+              <Select label="Driver" values={drivers} value={driver} onChange={setDriver} />
+              <Select label="Session" values={selectedRace.sessions} value={session} onChange={setSession} />
               <Button
                 variant="outline"
                 className="h-9 border-border bg-[#111418] sm:col-span-2 lg:col-span-1"
@@ -131,17 +157,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
         <main className="px-4 py-4 xl:px-6">{children}</main>
       </div>
-    </div>
+      </div>
+    </RaceSelectionProvider>
   );
 }
 
-function RaceSelect({ races, selectedRaceId }: { races: typeof raceCatalogue; selectedRaceId: string }) {
+function RaceSelect({
+  races,
+  selectedRaceId,
+  onChange
+}: {
+  races: typeof raceCatalogue;
+  selectedRaceId: string;
+  onChange: (raceId: string) => void;
+}) {
   return (
     <label className="grid gap-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
       Race
       <select
         className="h-9 min-w-44 border border-border bg-[#111418] px-2 font-mono text-sm text-foreground outline-none focus:border-primary"
-        defaultValue={selectedRaceId}
+        value={selectedRaceId}
+        onChange={(event) => onChange(event.target.value)}
       >
         {races.map((race) => (
           <option key={race.id} value={race.id}>
@@ -156,6 +192,7 @@ function RaceSelect({ races, selectedRaceId }: { races: typeof raceCatalogue; se
 function statusLabel(status: RaceStatus) {
   if (status === "live") return "[LIVE]";
   if (status === "upcoming") return "[UPCOMING]";
+  if (status === "cancelled") return "[CANCELLED]";
   return "[COMPLETED]";
 }
 
@@ -163,7 +200,8 @@ function StatusBadge({ status }: { status: RaceStatus }) {
   const styles = {
     live: "border-[#e10600] text-[#e10600]",
     upcoming: "border-[#2f80ed] text-[#2f80ed]",
-    completed: "border-[#00c853] text-[#00c853]"
+    completed: "border-[#00c853] text-[#00c853]",
+    cancelled: "border-[#9aa4b2] text-[#9aa4b2]"
   };
   return (
     <span className={`border px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] ${styles[status]}`}>
@@ -172,11 +210,25 @@ function StatusBadge({ status }: { status: RaceStatus }) {
   );
 }
 
-function Select({ label, values }: { label: string; values: string[] }) {
+function Select({
+  label,
+  values,
+  value,
+  onChange
+}: {
+  label: string;
+  values: string[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <label className="grid gap-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
       {label}
-      <select className="h-9 min-w-36 border border-border bg-[#111418] px-2 font-mono text-sm text-foreground outline-none focus:border-primary">
+      <select
+        className="h-9 min-w-36 border border-border bg-[#111418] px-2 font-mono text-sm text-foreground outline-none focus:border-primary"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
         {values.map((value) => (
           <option key={value}>{value}</option>
         ))}

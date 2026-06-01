@@ -8,39 +8,60 @@ import {
   RaceTimeline,
   StrategyConfidenceBands
 } from "@/components/charts/motorsport-charts";
+import { useRaceSelection } from "@/contexts/race-selection-context";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/states/empty-state";
+import { DataAvailability } from "@/components/strategy/data-availability";
+import { StrategyExplainer } from "@/components/strategy/strategy-explainer";
 import { pitWindowHeatmap, raceTimeline, recommendation, scenarioMatches } from "@/lib/mock-data";
 
 export default function DashboardPage() {
   return (
     <AppShell>
+      <DashboardContent />
+    </AppShell>
+  );
+}
+
+function DashboardContent() {
+  const selection = useRaceSelection();
+  return (
+    <>
       <PageHeader title="Dashboard" eyebrow="StintSync command">
         <div className="font-mono text-xs text-muted-foreground">LIVE READY / FASTF1 + OPENF1</div>
       </PageHeader>
+      <DataAvailability race={selection.race} />
+      <StrategyExplainer mode="pit" />
 
-      <section className="mb-4 border border-border bg-[#111418]">
+      <section className="mb-4 mt-4 border border-border bg-[#111418]">
         <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-              Current strategy recommendation
+              <span className={`h-2 w-2 rounded-full ${selection.hasValidatedTelemetry ? "animate-pulse bg-primary" : "bg-[#9aa4b2]"}`} />
+              {selection.hasValidatedTelemetry ? "Current strategy recommendation" : "Strategy recommendation locked"}
             </div>
             <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <HeroMetric label="Pit Window" value={recommendation.pitWindow} />
-              <HeroMetric label="Undercut" value={`${Math.round(recommendation.undercutProbability * 100)}%`} />
-              <HeroMetric label="Overcut" value={`${Math.round(recommendation.overcutProbability * 100)}%`} />
-              <HeroMetric label="Expected Gain" value={`+${recommendation.expectedGainSeconds.toFixed(1)}s`} />
+              <HeroMetric label="Pit Window" value={selection.hasValidatedTelemetry ? recommendation.pitWindow : "Awaiting data"} />
+              <HeroMetric label="Undercut" value={selection.hasValidatedTelemetry ? `${Math.round(recommendation.undercutProbability * 100)}%` : "-"} />
+              <HeroMetric label="Overcut" value={selection.hasValidatedTelemetry ? `${Math.round(recommendation.overcutProbability * 100)}%` : "-"} />
+              <HeroMetric label="Expected Gain" value={selection.hasValidatedTelemetry ? `+${recommendation.expectedGainSeconds.toFixed(1)}s` : "-"} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-0">
-            <HeroMetric label="Confidence" value={`${Math.round(recommendation.confidence * 100)}%`} compact />
-            <HeroMetric label="Risk" value={`${Math.round(recommendation.risk * 100)}%`} compact />
+            <HeroMetric label="Confidence" value={selection.hasValidatedTelemetry ? `${Math.round(recommendation.confidence * 100)}%` : "-"} compact />
+            <HeroMetric label="Risk" value={selection.hasValidatedTelemetry ? `${Math.round(recommendation.risk * 100)}%` : "-"} compact />
           </div>
         </div>
       </section>
 
-      <div className="grid gap-4">
+      {!selection.hasValidatedTelemetry ? (
+        <EmptyState
+          title="No validated strategy data"
+          description="Select a race/session after ETL has loaded real FastF1/OpenF1 laps, telemetry, stints, weather, and pit stops. StintSync will not show fabricated pit-window output."
+        />
+      ) : (
+        <div className="grid gap-4">
         <ChartPanel
           title="Pit Window Heatmap"
           subtitle="Expected gain and risk by candidate stop lap"
@@ -67,8 +88,9 @@ export default function DashboardPage() {
         >
           <HistoricalScenarioExplorer scenarios={scenarioMatches} />
         </ChartPanel>
-      </div>
-    </AppShell>
+        </div>
+      )}
+    </>
   );
 }
 
