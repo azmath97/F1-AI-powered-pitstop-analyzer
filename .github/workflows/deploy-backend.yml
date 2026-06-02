@@ -12,7 +12,12 @@ on:
 jobs:
   render-hook:
     runs-on: ubuntu-latest
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
     steps:
+      - name: Skip when Render hook is not configured
+        if: ${{ env.RENDER_DEPLOY_HOOK_URL == '' }}
+        run: echo "::warning::RENDER_DEPLOY_HOOK_URL is not configured; skipping Render deploy."
       - name: Trigger Render deploy hook
-        run: curl -fsSL -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
-
+        if: ${{ env.RENDER_DEPLOY_HOOK_URL != '' }}
+        run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"

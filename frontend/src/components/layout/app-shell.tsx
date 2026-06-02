@@ -1,20 +1,16 @@
 "use client";
 
 import {
-  Activity,
-  Building2,
   CircuitBoard,
+  ClipboardList,
   Flag,
   Gauge,
   GitCompare,
   LayoutDashboard,
   Moon,
-  RadioTower,
   Route,
   Sun,
-  TimerReset,
-  UserRound,
-  Video
+  TimerReset
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,17 +24,12 @@ import type { RaceStatus } from "@/types/f1";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/live", label: "Live Race", icon: RadioTower },
-  { href: "/race-analysis", label: "Race Analysis", icon: Flag },
-  { href: "/race-replay", label: "Race Replay", icon: Video },
-  { href: "/telemetry", label: "Telemetry", icon: Activity },
+  { href: "/race-analysis", label: "Race Brief", icon: Flag },
+  { href: "/race-replay", label: "Pit Stops", icon: ClipboardList },
   { href: "/tyres", label: "Tyres", icon: Gauge },
   { href: "/undercut", label: "Undercut", icon: GitCompare },
   { href: "/overcut", label: "Overcut", icon: Route },
-  { href: "/simulator", label: "Simulator", icon: TimerReset },
-  { href: "/drivers", label: "Drivers", icon: UserRound },
-  { href: "/teams", label: "Teams", icon: Building2 },
-  { href: "/circuits", label: "Circuits", icon: CircuitBoard }
+  { href: "/simulator", label: "Simulator", icon: TimerReset }
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -82,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <CircuitBoard className="h-4 w-4" />
             StintSync
           </div>
-          <div className="mt-2 text-base font-semibold">Race Intelligence Platform</div>
+          <div className="mt-2 text-base font-semibold">Pit Wall Strategy Console</div>
         </div>
         <nav className="space-y-1 p-3" aria-label="Primary">
           {navItems.map((item) => {
@@ -115,7 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-10 border-b border-border bg-[#0b0d10]/95 backdrop-blur">
           <div className="flex min-h-16 flex-col gap-3 px-4 py-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-3">
-              <RadioTower className="h-5 w-5 text-primary" />
+              <ClipboardList className="h-5 w-5 text-primary" />
               <div>
                 <div className="text-sm text-muted-foreground">Race Engineering Workspace</div>
                 <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-foreground">

@@ -4,16 +4,16 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "StintSync",
-  description: "AI-Powered Formula 1 Strategy & Race Intelligence Platform",
+  description: "Formula 1 pit-stop strategy and tyre-stint analysis console",
   openGraph: {
     title: "StintSync",
-    description: "AI-Powered Formula 1 Strategy & Race Intelligence Platform",
+    description: "Formula 1 pit-stop strategy and tyre-stint analysis console",
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
     title: "StintSync",
-    description: "AI-Powered Formula 1 Strategy & Race Intelligence Platform"
+    description: "Formula 1 pit-stop strategy and tyre-stint analysis console"
   }
 };
 

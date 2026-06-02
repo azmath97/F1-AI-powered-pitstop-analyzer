@@ -3,12 +3,12 @@ import type { RaceOption } from "@/types/f1";
 export function DataAvailability({ race }: { race: RaceOption }) {
   const detail =
     race.status === "cancelled"
-      ? "This event was cancelled, so telemetry, pit stops, stints, and strategy model outputs are intentionally unavailable."
+      ? "This event was cancelled, so pit stops, stints, and strategy model outputs are intentionally unavailable."
       : race.status === "upcoming"
-        ? "This race has not happened yet. StintSync will not fabricate telemetry or strategy probabilities before validated session data exists."
+        ? "This race has not happened yet. StintSync will show only the race brief until verified pit-stop and stint data exists."
         : race.hasTelemetry
-          ? "Validated telemetry is available for this selection."
-          : "This completed race is in the catalogue. Pit stops can be loaded on demand from FastF1 when the backend is running; full telemetry charts require ETL-loaded database records.";
+          ? "Validated pit-stop, stint, and tyre analysis data is available for this selection."
+          : "This completed race is in the catalogue. Pit stops can be loaded on demand from FastF1 when the backend is running; advanced stint and degradation analysis requires ETL-loaded database records.";
 
   return (
     <section className="mb-4 border border-border bg-[#111418] px-3 py-2">

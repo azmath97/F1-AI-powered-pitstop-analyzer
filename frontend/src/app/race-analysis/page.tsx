@@ -1,9 +1,6 @@
 "use client";
 
-import { ChartPanel } from "@/components/charts/chart-panel";
-import { RacingLine } from "@/components/charts/motorsport-charts";
 import { useRaceSelection } from "@/contexts/race-selection-context";
-import { useCircuitMap } from "@/hooks/use-circuit-map";
 import { useSessionSummary } from "@/hooks/use-session-summary";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -28,40 +25,43 @@ function RaceAnalysisContent() {
     session: selection.session,
     enabled
   });
-  const {
-    data: circuitMap,
-    isLoading: isMapLoading,
-    error: mapError
-  } = useCircuitMap({
-    season: selection.season,
-    round: selection.race.round,
-    session: selection.session,
-    driver: selection.driver,
-    enabled
-  });
 
   return (
     <>
-      <PageHeader title="Race Analysis" eyebrow={`${selection.race.name} / ${selection.session}`} />
+      <PageHeader title="Race Brief" eyebrow={`${selection.race.name} / ${selection.session}`} />
       <DataAvailability race={selection.race} />
-      {enabled && isMapLoading ? (
-        <div className="h-[500px] animate-pulse border border-border bg-[#111418]" />
-      ) : enabled && circuitMap && !mapError ? (
-        <ChartPanel title="FastF1 Circuit Map" subtitle={`${circuitMap.raceName} / ${circuitMap.driver} fastest lap telemetry`}>
-          <RacingLine points={circuitMap.points} title={selection.race.circuit} />
-        </ChartPanel>
-      ) : (
-        <EmptyState
-          title="Circuit map unavailable"
-          description="No placeholder map is shown here. A map appears only when FastF1 returns real X/Y telemetry for the selected completed session and driver."
+
+      <section className="grid gap-3 border border-border bg-[#111418] p-4 lg:grid-cols-4">
+        <BriefMetric label="Event" value={selection.race.name} />
+        <BriefMetric label="Circuit" value={selection.race.circuit} />
+        <BriefMetric label="Session" value={selection.session} />
+        <BriefMetric label="Status" value={selection.race.status.toUpperCase()} tone={selection.race.status === "completed" ? "green" : "blue"} />
+      </section>
+
+      <section className="mt-4 grid gap-4 xl:grid-cols-3">
+        <BriefPanel
+          title="Pit-Stop Focus"
+          body={
+            selection.race.status === "completed"
+              ? "Verified pit-stop rows are loaded first because they drive undercut, overcut, and pit-window analysis."
+              : "Pit-stop analysis unlocks after the session has run and FastF1/OpenF1 publish reliable stop and stint records."
+          }
         />
-      )}
+        <BriefPanel
+          title="Tyre-Stint Focus"
+          body="The core dataset is laps, compounds, tyre age, stint boundaries, pit-in/pit-out timing, and weather context. Full car telemetry is optional enrichment, not the main product."
+        />
+        <BriefPanel
+          title="Strategy Modules"
+          body="Undercut, overcut, tyre degradation, and simulator views use the compact pit-stop and stint dataset before heavier race-wide analysis."
+        />
+      </section>
 
       {!enabled ? (
         <div className="mt-4">
           <EmptyState
-            title="Race analysis unavailable"
-            description="Cancelled and upcoming races do not have completed-race pit stops, gaps, tyre stints, or position evolution."
+            title="Pit-stop data not available yet"
+            description="For upcoming races, StintSync keeps this page as a race brief. Pit-stop tables, stint analysis, and strategy predictions appear only after verified session data exists."
           />
         </div>
       ) : isLoading ? (
@@ -69,8 +69,8 @@ function RaceAnalysisContent() {
       ) : error || !data ? (
         <div className="mt-4">
           <EmptyState
-            title="FastF1 data not loaded"
-            description="Start the FastAPI backend on port 8000 and ensure FastF1 can access/cache this season and round. For full telemetry charts, run ETL into PostgreSQL or Supabase."
+            title="FastF1 pit-stop data not loaded"
+            description="Start the FastAPI backend on port 8000 and ensure FastF1 can access/cache this completed race. The app will not show substitute race-analysis data."
           />
         </div>
       ) : (
@@ -80,12 +80,39 @@ function RaceAnalysisContent() {
           </div>
           <div className="mt-4">
             <EmptyState
-              title="Telemetry-dependent charts waiting for ETL"
-              description="Position evolution, gap evolution, tyre stint timelines, and safety-car impact charts require validated laps, position history, weather, and race-control data from ETL."
+              title="Advanced stint analysis waiting for ETL"
+              description="The next dataset layer should store compact laps, tyre age, stint boundaries, and pit-cycle gaps for degradation, undercut, overcut, and simulation."
             />
           </div>
         </>
       )}
     </>
+  );
+}
+
+function BriefMetric({
+  label,
+  value,
+  tone = "default"
+}: {
+  label: string;
+  value: string;
+  tone?: "default" | "green" | "blue";
+}) {
+  const toneClass = tone === "green" ? "text-[#00c853]" : tone === "blue" ? "text-[#2f80ed]" : "text-foreground";
+  return (
+    <div className="border border-border bg-[#0b0d10] px-3 py-2">
+      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
+      <div className={`metric-font mt-1 truncate text-sm font-semibold ${toneClass}`}>{value}</div>
+    </div>
+  );
+}
+
+function BriefPanel({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="border border-border bg-[#111418] p-4">
+      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{title}</div>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">{body}</p>
+    </div>
   );
 }
