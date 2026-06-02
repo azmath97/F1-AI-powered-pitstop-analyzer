@@ -57,7 +57,7 @@ function RaceAnalysisContent() {
       ) : (
         <>
           <div className="mt-4">
-            <PitStopTable pitStops={data.pitStops} />
+            <PitStopTable pitStops={data.pitStops} season={selection.season} />
           </div>
           <div className="mt-4">
             <EmptyState
