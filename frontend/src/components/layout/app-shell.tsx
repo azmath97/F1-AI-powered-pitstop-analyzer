@@ -22,7 +22,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { RaceSelectionProvider } from "@/contexts/race-selection-context";
-import { getDriversForSeason, raceCatalogue } from "@/lib/mock-data";
+import { getDriversForSeason, getNextRaceForSeason, getRacesForSeason, raceCatalogue } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import type { RaceStatus } from "@/types/f1";
 
@@ -48,8 +48,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [raceId, setRaceId] = useState<string | undefined>();
   const [driver, setDriver] = useState("NOR");
   const [session, setSession] = useState("Race");
-  const races = raceCatalogue.filter((race) => race.season === season);
-  const defaultRace = races.find((race) => race.status === "upcoming") ?? races.find((race) => race.status === "live") ?? races[0] ?? raceCatalogue[0];
+  const races = getRacesForSeason(season);
+  const defaultRace = getNextRaceForSeason(season) ?? races[0] ?? raceCatalogue[0];
   const selectedRace = races.find((race) => race.id === raceId) ?? defaultRace;
   const drivers = getDriversForSeason(season);
   const selection = useMemo(

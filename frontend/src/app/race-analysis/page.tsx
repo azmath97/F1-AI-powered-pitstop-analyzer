@@ -1,49 +1,72 @@
 "use client";
 
 import { ChartPanel } from "@/components/charts/chart-panel";
-import { downloadCsv } from "@/components/charts/plotly-chart";
-import {
-  GapEvolutionChart,
-  PositionEvolutionChart,
-  RacingLine,
-  RaceTimeline,
-  SafetyCarImpactAnalysis,
-  TyreStintTimeline
-} from "@/components/charts/motorsport-charts";
+import { RacingLine } from "@/components/charts/motorsport-charts";
+import { useRaceSelection } from "@/contexts/race-selection-context";
+import { useSessionSummary } from "@/hooks/use-session-summary";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { circuit, raceTimeline, replayFrames } from "@/lib/mock-data";
+import { EmptyState } from "@/components/states/empty-state";
+import { DataAvailability } from "@/components/strategy/data-availability";
+import { PitStopTable } from "@/components/strategy/pit-stop-table";
+import { getCircuitPointsForRace } from "@/lib/mock-data";
 
 export default function RaceAnalysisPage() {
   return (
     <AppShell>
-      <PageHeader title="Race Analysis" eyebrow="Events, positions, circuit context" />
-      <div className="grid gap-4">
-        <ChartPanel title="Race Position Evolution" onCsv={() => downloadCsv("race-positions.csv", replayFrames.flatMap((frame) => frame.positions))}>
-          <PositionEvolutionChart frames={replayFrames} />
-        </ChartPanel>
-      </div>
-      <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_1fr]">
-        <ChartPanel title="Race Timeline" onCsv={() => downloadCsv("race-events.csv", raceTimeline)}>
-          <RaceTimeline events={raceTimeline} />
-        </ChartPanel>
-        <ChartPanel title="Safety Car Impact Timeline" onCsv={() => downloadCsv("safety-car-impact.csv", raceTimeline)}>
-          <SafetyCarImpactAnalysis events={raceTimeline} />
-        </ChartPanel>
-      </div>
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
-        <ChartPanel title="Gap Evolution" onCsv={() => downloadCsv("gap-evolution.csv", replayFrames.flatMap((frame) => frame.positions))}>
-          <GapEvolutionChart frames={replayFrames} />
-        </ChartPanel>
-        <ChartPanel title="Tyre Stint Timeline" onCsv={() => downloadCsv("tyre-stints.csv", replayFrames.flatMap((frame) => frame.tyres))}>
-          <TyreStintTimeline frames={replayFrames} />
-        </ChartPanel>
-      </div>
-      <div className="mt-4">
-        <ChartPanel title="Interactive Circuit Map" subtitle="Sectors, DRS/overtaking zones, pit entry/exit placeholders" onCsv={() => downloadCsv("circuit-map.csv", circuit)}>
-          <RacingLine points={circuit} title="Circuit Map" />
-        </ChartPanel>
-      </div>
+      <RaceAnalysisContent />
     </AppShell>
+  );
+}
+
+function RaceAnalysisContent() {
+  const selection = useRaceSelection();
+  const points = getCircuitPointsForRace(selection.race.id);
+  const enabled = selection.race.status === "completed" && selection.race.round > 0;
+  const { data, isLoading, error } = useSessionSummary({
+    season: selection.season,
+    round: selection.race.round,
+    session: selection.session,
+    enabled
+  });
+
+  return (
+    <>
+      <PageHeader title="Race Analysis" eyebrow={`${selection.race.name} / ${selection.session}`} />
+      <DataAvailability race={selection.race} />
+      <ChartPanel title="Circuit Map" subtitle="Race-specific circuit outline">
+        <RacingLine points={points} title={selection.race.circuit} />
+      </ChartPanel>
+
+      {!enabled ? (
+        <div className="mt-4">
+          <EmptyState
+            title="Race analysis unavailable"
+            description="Cancelled and upcoming races do not have completed-race pit stops, gaps, tyre stints, or position evolution."
+          />
+        </div>
+      ) : isLoading ? (
+        <div className="mt-4 h-48 animate-pulse border border-border bg-[#111418]" />
+      ) : error || !data ? (
+        <div className="mt-4">
+          <EmptyState
+            title="FastF1 data not loaded"
+            description="The backend could not load the selected completed race yet. Start the FastAPI service with FastF1 access or run ETL to populate the database."
+          />
+        </div>
+      ) : (
+        <>
+          <div className="mt-4">
+            <PitStopTable pitStops={data.pitStops} />
+          </div>
+          <div className="mt-4">
+            <EmptyState
+              title="Telemetry-dependent charts waiting for ETL"
+              description="Position evolution, gap evolution, tyre stint timelines, and safety-car impact charts require validated laps, position history, weather, and race-control data from ETL."
+            />
+          </div>
+        </>
+      )}
+    </>
   );
 }

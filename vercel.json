@@ -1,9 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
+  "buildCommand": "npm --workspace frontend run build",
+  "devCommand": "npm --workspace frontend run dev",
   "framework": "nextjs",
-  "installCommand": "npm install",
-  "outputDirectory": ".next",
-  "rootDirectory": "frontend"
+  "installCommand": "npm ci",
+  "outputDirectory": "frontend/.next"
 }
-

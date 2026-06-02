@@ -3,6 +3,7 @@
 import type { Data, Layout } from "plotly.js";
 
 import { PlotlyChart } from "@/components/charts/plotly-chart";
+import { getDriverColor } from "@/lib/driver-colors";
 import type {
   CircuitPoint,
   CompoundComparison,
@@ -338,7 +339,7 @@ export function PositionEvolutionChart({ frames }: { frames: ReplayFrame[] }) {
             type: "scatter",
             mode: "lines",
             name: driver,
-            line: { width: driver === "NOR" ? 4 : 2 }
+            line: { color: getDriverColor(driver), width: driver === "NOR" ? 4 : 2 }
           }) as Data
       )}
       layout={{
@@ -361,7 +362,8 @@ export function GapEvolutionChart({ frames }: { frames: ReplayFrame[] }) {
             y: frames.map((frame) => frame.positions.find((item) => item.driver === driver)?.gap ?? null),
             type: "scatter",
             mode: "lines",
-            name: driver
+            name: driver,
+            line: { color: getDriverColor(driver), width: driver === "NOR" ? 3 : 2 }
           }) as Data
       )}
       layout={{ yaxis: { title: { text: "Gap to leader (s)" } }, xaxis: { title: { text: "Lap" } } }}
@@ -476,7 +478,7 @@ export function LivePositionTracker({ drivers }: { drivers: LiveDriverState[] })
           textposition: "top center",
           marker: {
             size: drivers.map((driver) => (driver.position === 1 ? 18 : driver.driver === "NOR" ? 16 : 12)),
-            color: drivers.map((driver) => (driver.position === 1 ? "#00c853" : driver.driver === "NOR" ? "#e10600" : "#9aa4b2")),
+            color: drivers.map((driver) => getDriverColor(driver.driver)),
             line: { color: "#0b0d10", width: 2 }
           },
           hovertemplate: "%{text}<extra></extra>"
@@ -517,7 +519,7 @@ export function DriverComparisonOverlay({ points }: { points: TelemetryPoint[] }
           type: "scatter",
           mode: "lines",
           name: "NOR",
-          line: { color: "#e10600", width: 3 }
+          line: { color: getDriverColor("NOR"), width: 3 }
         } as Data,
         {
           x: points.map((point) => point.distance),
@@ -525,7 +527,7 @@ export function DriverComparisonOverlay({ points }: { points: TelemetryPoint[] }
           type: "scatter",
           mode: "lines",
           name: "LEC",
-          line: { color: "#f5f7fa", width: 2 }
+          line: { color: getDriverColor("LEC"), width: 2 }
         } as Data
       ]}
       layout={{ yaxis: { title: { text: "Speed (km/h)" } }, xaxis: { title: { text: "Distance (m)" } } }}

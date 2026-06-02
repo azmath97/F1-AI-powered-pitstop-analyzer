@@ -57,27 +57,46 @@ export const raceCatalogue: RaceOption[] = [
       : ["Practice", "Qualifying", "Race"]
   })),
   ...[
-    ["Australian GP", "Albert Park", "Australia", "completed", "2026-03-06", "2026-03-08"],
-    ["Chinese GP", "Shanghai", "China", "completed", "2026-03-13", "2026-03-15"],
-    ["Japanese GP", "Suzuka", "Japan", "completed", "2026-03-27", "2026-03-29"],
-    ["Bahrain GP", "Sakhir", "Bahrain", "cancelled", "2026-04-10", "2026-04-12"],
-    ["Saudi Arabian GP", "Jeddah", "Saudi Arabia", "cancelled", "2026-04-17", "2026-04-19"],
-    ["Miami GP", "Miami", "United States", "completed", "2026-05-01", "2026-05-03"],
-    ["Canadian GP", "Gilles Villeneuve", "Canada", "completed", "2026-05-22", "2026-05-24"],
-    ["Monaco GP", "Monaco", "Monaco", "upcoming", "2026-06-05", "2026-06-07"]
-  ].map(([name, circuitName, country, status, startDate, endDate], index) => ({
-    id: `2026-${name.toLowerCase().replaceAll(" ", "-")}`,
+    [1, "Australian GP", "Albert Park", "Australia", "completed", "2026-03-06", "2026-03-08"],
+    [2, "Chinese GP", "Shanghai", "China", "completed", "2026-03-13", "2026-03-15"],
+    [3, "Japanese GP", "Suzuka", "Japan", "completed", "2026-03-27", "2026-03-29"],
+    [0, "Bahrain GP", "Sakhir", "Bahrain", "cancelled", "2026-04-10", "2026-04-12"],
+    [0, "Saudi Arabian GP", "Jeddah", "Saudi Arabia", "cancelled", "2026-04-17", "2026-04-19"],
+    [4, "Miami GP", "Miami", "United States", "completed", "2026-05-01", "2026-05-03"],
+    [5, "Canadian GP", "Gilles Villeneuve", "Canada", "completed", "2026-05-22", "2026-05-24"],
+    [6, "Monaco GP", "Monaco", "Monaco", "upcoming", "2026-06-05", "2026-06-07"],
+    [7, "Barcelona-Catalunya GP", "Barcelona-Catalunya", "Spain", "upcoming", "2026-06-12", "2026-06-14"],
+    [8, "Austrian GP", "Red Bull Ring", "Austria", "upcoming", "2026-06-26", "2026-06-28"],
+    [9, "British GP", "Silverstone", "United Kingdom", "upcoming", "2026-07-03", "2026-07-05"],
+    [10, "Belgian GP", "Spa-Francorchamps", "Belgium", "upcoming", "2026-07-17", "2026-07-19"],
+    [11, "Hungarian GP", "Hungaroring", "Hungary", "upcoming", "2026-07-24", "2026-07-26"],
+    [12, "Dutch GP", "Zandvoort", "Netherlands", "upcoming", "2026-08-21", "2026-08-23"],
+    [13, "Italian GP", "Monza", "Italy", "upcoming", "2026-09-04", "2026-09-06"],
+    [14, "Spanish GP", "Madrid", "Spain", "upcoming", "2026-09-11", "2026-09-13"],
+    [15, "Azerbaijan GP", "Baku", "Azerbaijan", "upcoming", "2026-09-24", "2026-09-26"],
+    [16, "Singapore GP", "Marina Bay", "Singapore", "upcoming", "2026-10-09", "2026-10-11"],
+    [17, "United States GP", "Circuit of the Americas", "United States", "upcoming", "2026-10-23", "2026-10-25"],
+    [18, "Mexico City GP", "Autodromo Hermanos Rodriguez", "Mexico", "upcoming", "2026-10-30", "2026-11-01"],
+    [19, "Sao Paulo GP", "Interlagos", "Brazil", "upcoming", "2026-11-06", "2026-11-08"],
+    [20, "Las Vegas GP", "Las Vegas Strip", "United States", "upcoming", "2026-11-19", "2026-11-21"],
+    [21, "Qatar GP", "Lusail", "Qatar", "upcoming", "2026-11-27", "2026-11-29"],
+    [22, "Abu Dhabi GP", "Yas Marina", "United Arab Emirates", "upcoming", "2026-12-04", "2026-12-06"]
+  ].map(([round, name, circuitName, country, status, startDate, endDate]) => {
+    const raceName = String(name);
+    return {
+    id: `2026-${raceName.toLowerCase().replaceAll(" ", "-")}`,
     season: 2026,
-    round: index + 1,
-    name,
-    circuit: circuitName,
-    country,
+    round: Number(round),
+    name: raceName,
+    circuit: String(circuitName),
+    country: String(country),
     status: status as "completed" | "upcoming" | "cancelled",
-    startDate,
-    endDate,
+    startDate: String(startDate),
+    endDate: String(endDate),
     hasTelemetry: false,
     sessions: ["Practice", "Qualifying", "Race"]
-  }))
+  };
+  })
 ];
 
 const driversBySeason: Record<number, string[]> = {
@@ -93,6 +112,35 @@ export const driverOptions = getDriversForSeason(2026);
 
 export function getRaceById(id: string) {
   return raceCatalogue.find((race) => race.id === id) ?? raceCatalogue.find((race) => race.status === "upcoming") ?? raceCatalogue[0];
+}
+
+export function resolveRaceStatus(race: RaceOption, now = new Date()): RaceOption["status"] {
+  if (race.status === "cancelled") return "cancelled";
+  const start = new Date(`${race.startDate}T00:00:00Z`);
+  const end = new Date(`${race.endDate}T23:59:59Z`);
+  if (now > end) return "completed";
+  if (now >= start && now <= end && race.hasTelemetry) return "live";
+  return "upcoming";
+}
+
+export function resolveRace(race: RaceOption, now = new Date()): RaceOption {
+  return { ...race, status: resolveRaceStatus(race, now) };
+}
+
+export function getRacesForSeason(season: number, now = new Date()) {
+  return raceCatalogue
+    .filter((race) => race.season === season)
+    .map((race) => resolveRace(race, now))
+    .sort((left, right) => left.startDate.localeCompare(right.startDate));
+}
+
+export function getNextRaceForSeason(season: number, now = new Date()) {
+  const races = getRacesForSeason(season, now);
+  return (
+    races.find((race) => race.status !== "cancelled" && new Date(`${race.endDate}T23:59:59Z`) >= now) ??
+    races.find((race) => race.status !== "cancelled") ??
+    races[0]
+  );
 }
 
 export function getCircuitPointsForRace(raceId: string): CircuitPoint[] {

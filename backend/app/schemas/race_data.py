@@ -1,0 +1,22 @@
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+class PitStopSummary(BaseModel):
+    driver: str
+    lap: int = Field(gt=0)
+    stopNumber: int = Field(gt=0)
+    compoundBefore: str | None = None
+    compoundAfter: str | None = None
+    pitInTime: str | None = None
+    pitOutTime: str | None = None
+
+
+class SessionSummary(BaseModel):
+    season: int
+    round: int
+    raceName: str
+    session: str
+    source: Literal["fastf1", "database"] = "fastf1"
+    pitStops: list[PitStopSummary]

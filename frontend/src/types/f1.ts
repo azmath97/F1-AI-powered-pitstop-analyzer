@@ -85,6 +85,25 @@ export interface ReplayFrame {
   status: string;
 }
 
+export interface PitStopSummary {
+  driver: string;
+  lap: number;
+  stopNumber: number;
+  compoundBefore?: TyreCompound | null;
+  compoundAfter?: TyreCompound | null;
+  pitInTime?: string | null;
+  pitOutTime?: string | null;
+}
+
+export interface SessionSummary {
+  season: number;
+  round: number;
+  raceName: string;
+  session: string;
+  source: "fastf1" | "database";
+  pitStops: PitStopSummary[];
+}
+
 export interface StrategyRecommendation {
   race: string;
   session: string;

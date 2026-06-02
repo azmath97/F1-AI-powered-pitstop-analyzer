@@ -14,7 +14,7 @@ export function DataAvailability({ race }: { race: RaceOption }) {
     <section className="mb-4 border border-border bg-[#111418] px-3 py-2">
       <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-          {race.season} Round {race.round} / {race.name}
+          {race.season} {race.round > 0 ? `Round ${race.round}` : "Cancelled event"} / {race.name}
         </div>
         <div className="font-mono text-xs text-muted-foreground">
           {race.startDate} to {race.endDate}

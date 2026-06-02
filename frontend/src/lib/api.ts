@@ -2,7 +2,7 @@ import axios from "axios";
 import { z } from "zod";
 
 import { liveSnapshot } from "@/lib/mock-data";
-import type { LiveRaceSnapshot } from "@/types/f1";
+import type { LiveRaceSnapshot, SessionSummary } from "@/types/f1";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -60,6 +60,21 @@ export async function getLiveRaceSnapshot(): Promise<LiveRaceSnapshot> {
   }
 }
 
+export async function getSessionSummary({
+  season,
+  round,
+  session
+}: {
+  season: number;
+  round: number;
+  session: string;
+}): Promise<SessionSummary> {
+  const response = await api.get("/api/v1/race-data/session-summary", {
+    params: { season, round, session }
+  });
+  return sessionSummarySchema.parse(response.data);
+}
+
 const liveDriverStateSchema = z.object({
   driver: z.string(),
   team: z.string(),
@@ -101,4 +116,23 @@ const liveRaceSnapshotSchema = z.object({
   confidence: z.number(),
   risk: z.number(),
   updatedAt: z.string()
+});
+
+const pitStopSummarySchema = z.object({
+  driver: z.string(),
+  lap: z.number(),
+  stopNumber: z.number(),
+  compoundBefore: z.enum(["Soft", "Medium", "Hard", "Intermediate", "Wet", "Unknown"]).optional().nullable(),
+  compoundAfter: z.enum(["Soft", "Medium", "Hard", "Intermediate", "Wet", "Unknown"]).optional().nullable(),
+  pitInTime: z.string().optional().nullable(),
+  pitOutTime: z.string().optional().nullable()
+});
+
+const sessionSummarySchema = z.object({
+  season: z.number(),
+  round: z.number(),
+  raceName: z.string(),
+  session: z.string(),
+  source: z.enum(["fastf1", "database"]),
+  pitStops: z.array(pitStopSummarySchema)
 });
