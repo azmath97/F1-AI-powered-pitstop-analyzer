@@ -21,17 +21,34 @@ def build_session_summary(season: int, round_number: int, session_type: str) -> 
 
     pit_stops: list[PitStopSummary] = []
     stop_counts: dict[str, int] = {}
+    pending_in_laps: dict[str, dict[str, object]] = {}
     for _, row in pit_rows.sort_values(["Driver", "LapNumber"]).iterrows():
         driver = str(row["Driver"])
+        has_pit_in = _string_or_none(row.get("PitInTime")) is not None
+        has_pit_out = _string_or_none(row.get("PitOutTime")) is not None
+
+        if has_pit_in:
+            pending_in_laps[driver] = {
+                "lap": int(row["LapNumber"]),
+                "compound": _compound_or_none(row.get("Compound")),
+                "pit_in_time": _string_or_none(row.get("PitInTime")),
+            }
+
+        if not has_pit_out:
+            continue
+
+        pending = pending_in_laps.pop(driver, None)
         stop_counts[driver] = stop_counts.get(driver, 0) + 1
         pit_stops.append(
             PitStopSummary(
                 driver=driver,
-                lap=int(row["LapNumber"]),
+                lap=int(pending["lap"]) if pending else int(row["LapNumber"]),
                 stopNumber=stop_counts[driver],
-                compoundBefore=_string_or_none(row.get("Compound")),
-                compoundAfter=None,
-                pitInTime=_string_or_none(row.get("PitInTime")),
+                compoundBefore=(
+                    str(pending["compound"]) if pending and pending["compound"] else None
+                ),
+                compoundAfter=_compound_or_none(row.get("Compound")),
+                pitInTime=str(pending["pit_in_time"]) if pending else None,
                 pitOutTime=_string_or_none(row.get("PitOutTime")),
             )
         )
@@ -54,3 +71,19 @@ def _string_or_none(value: object) -> str | None:
     except TypeError:
         pass
     return str(value)
+
+
+def _compound_or_none(value: object) -> str | None:
+    compound = _string_or_none(value)
+    if compound is None:
+        return None
+    normalized = compound.strip().lower().replace("_", " ")
+    mapping = {
+        "soft": "Soft",
+        "medium": "Medium",
+        "hard": "Hard",
+        "intermediate": "Intermediate",
+        "wet": "Wet",
+        "unknown": "Unknown",
+    }
+    return mapping.get(normalized, "Unknown")

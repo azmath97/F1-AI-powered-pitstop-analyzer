@@ -8,7 +8,7 @@ export function DataAvailability({ race }: { race: RaceOption }) {
         ? "This race has not happened yet. StintSync will not fabricate telemetry or strategy probabilities before validated session data exists."
         : race.hasTelemetry
           ? "Validated telemetry is available for this selection."
-          : "This historical race is in the catalogue, but validated FastF1/OpenF1 telemetry has not been loaded into the local database yet.";
+          : "This completed race is in the catalogue. Pit stops can be loaded on demand from FastF1 when the backend is running; full telemetry charts require ETL-loaded database records.";
 
   return (
     <section className="mb-4 border border-border bg-[#111418] px-3 py-2">

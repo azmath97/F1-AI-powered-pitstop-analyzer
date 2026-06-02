@@ -51,7 +51,7 @@ function RaceAnalysisContent() {
         <div className="mt-4">
           <EmptyState
             title="FastF1 data not loaded"
-            description="The backend could not load the selected completed race yet. Start the FastAPI service with FastF1 access or run ETL to populate the database."
+            description="Start the FastAPI backend on port 8000 and ensure FastF1 can access/cache this season and round. For full telemetry charts, run ETL into PostgreSQL or Supabase."
           />
         </div>
       ) : (
