@@ -20,3 +20,20 @@ class SessionSummary(BaseModel):
     session: str
     source: Literal["fastf1", "database"] = "fastf1"
     pitStops: list[PitStopSummary]
+
+
+class CircuitMapPoint(BaseModel):
+    x: float
+    y: float
+    speed: float | None = None
+    distance: float | None = None
+
+
+class CircuitMapSummary(BaseModel):
+    season: int
+    round: int
+    raceName: str
+    session: str
+    driver: str
+    source: Literal["fastf1", "database"] = "fastf1"
+    points: list[CircuitMapPoint]

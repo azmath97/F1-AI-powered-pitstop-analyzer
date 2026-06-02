@@ -3,13 +3,13 @@
 import { ChartPanel } from "@/components/charts/chart-panel";
 import { RacingLine } from "@/components/charts/motorsport-charts";
 import { useRaceSelection } from "@/contexts/race-selection-context";
+import { useCircuitMap } from "@/hooks/use-circuit-map";
 import { useSessionSummary } from "@/hooks/use-session-summary";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/states/empty-state";
 import { DataAvailability } from "@/components/strategy/data-availability";
 import { PitStopTable } from "@/components/strategy/pit-stop-table";
-import { getCircuitPointsForRace } from "@/lib/mock-data";
 
 export default function RaceAnalysisPage() {
   return (
@@ -21,7 +21,6 @@ export default function RaceAnalysisPage() {
 
 function RaceAnalysisContent() {
   const selection = useRaceSelection();
-  const points = getCircuitPointsForRace(selection.race.id);
   const enabled = selection.race.status === "completed" && selection.race.round > 0;
   const { data, isLoading, error } = useSessionSummary({
     season: selection.season,
@@ -29,14 +28,34 @@ function RaceAnalysisContent() {
     session: selection.session,
     enabled
   });
+  const {
+    data: circuitMap,
+    isLoading: isMapLoading,
+    error: mapError
+  } = useCircuitMap({
+    season: selection.season,
+    round: selection.race.round,
+    session: selection.session,
+    driver: selection.driver,
+    enabled
+  });
 
   return (
     <>
       <PageHeader title="Race Analysis" eyebrow={`${selection.race.name} / ${selection.session}`} />
       <DataAvailability race={selection.race} />
-      <ChartPanel title="Circuit Map" subtitle="Race-specific circuit outline">
-        <RacingLine points={points} title={selection.race.circuit} />
-      </ChartPanel>
+      {enabled && isMapLoading ? (
+        <div className="h-[500px] animate-pulse border border-border bg-[#111418]" />
+      ) : enabled && circuitMap && !mapError ? (
+        <ChartPanel title="FastF1 Circuit Map" subtitle={`${circuitMap.raceName} / ${circuitMap.driver} fastest lap telemetry`}>
+          <RacingLine points={circuitMap.points} title={selection.race.circuit} />
+        </ChartPanel>
+      ) : (
+        <EmptyState
+          title="Circuit map unavailable"
+          description="No placeholder map is shown here. A map appears only when FastF1 returns real X/Y telemetry for the selected completed session and driver."
+        />
+      )}
 
       {!enabled ? (
         <div className="mt-4">

@@ -2,7 +2,7 @@ import axios from "axios";
 import { z } from "zod";
 
 import { liveSnapshot } from "@/lib/mock-data";
-import type { LiveRaceSnapshot, SessionSummary } from "@/types/f1";
+import type { CircuitMapSummary, LiveRaceSnapshot, SessionSummary } from "@/types/f1";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -75,6 +75,23 @@ export async function getSessionSummary({
   return sessionSummarySchema.parse(response.data);
 }
 
+export async function getCircuitMap({
+  season,
+  round,
+  session,
+  driver
+}: {
+  season: number;
+  round: number;
+  session: string;
+  driver: string;
+}): Promise<CircuitMapSummary> {
+  const response = await api.get("/api/v1/race-data/circuit-map", {
+    params: { season, round, session, driver }
+  });
+  return circuitMapSummarySchema.parse(response.data);
+}
+
 const liveDriverStateSchema = z.object({
   driver: z.string(),
   team: z.string(),
@@ -135,4 +152,25 @@ const sessionSummarySchema = z.object({
   session: z.string(),
   source: z.enum(["fastf1", "database"]),
   pitStops: z.array(pitStopSummarySchema)
+});
+
+const circuitMapPointSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  speed: z.number().optional().nullable(),
+  distance: z.number().optional().nullable()
+}).transform((point) => ({
+  x: point.x,
+  y: point.y,
+  speed: point.speed ?? 0
+}));
+
+const circuitMapSummarySchema = z.object({
+  season: z.number(),
+  round: z.number(),
+  raceName: z.string(),
+  session: z.string(),
+  driver: z.string(),
+  source: z.enum(["fastf1", "database"]),
+  points: z.array(circuitMapPointSchema)
 });

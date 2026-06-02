@@ -1,19 +1,21 @@
 from __future__ import annotations
 
+from math import isfinite
 from pathlib import Path
 
 import fastf1
 
 from app.core.config import get_settings
-from app.schemas.race_data import PitStopSummary, SessionSummary
+from app.schemas.race_data import (
+    CircuitMapPoint,
+    CircuitMapSummary,
+    PitStopSummary,
+    SessionSummary,
+)
 
 
 def build_session_summary(season: int, round_number: int, session_type: str) -> SessionSummary:
-    settings = get_settings()
-    cache_dir = Path(settings.fastf1_cache_dir)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    fastf1.Cache.enable_cache(str(cache_dir))
-
+    _enable_fastf1_cache()
     session = fastf1.get_session(season, round_number, session_type)
     session.load(laps=True, telemetry=False, weather=False, messages=False)
     laps = session.laps
@@ -62,6 +64,67 @@ def build_session_summary(season: int, round_number: int, session_type: str) -> 
     )
 
 
+def build_circuit_map(
+    season: int,
+    round_number: int,
+    session_type: str,
+    driver: str | None = None,
+) -> CircuitMapSummary:
+    _enable_fastf1_cache()
+    session = fastf1.get_session(season, round_number, session_type)
+    session.load(laps=True, telemetry=True, weather=False, messages=False)
+
+    laps = session.laps
+    selected_driver = driver.upper() if driver else None
+    if selected_driver:
+        laps = laps.pick_driver(selected_driver)
+    if laps.empty:
+        raise ValueError(f"No laps found for driver {selected_driver or 'field'}")
+
+    fastest_lap = laps.pick_fastest()
+    if fastest_lap is None:
+        raise ValueError("No fastest lap available for circuit map")
+
+    telemetry = fastest_lap.get_telemetry()
+    if telemetry.empty or "X" not in telemetry or "Y" not in telemetry:
+        raise ValueError("FastF1 telemetry does not include X/Y circuit coordinates")
+
+    step = max(1, len(telemetry) // 450)
+    points: list[CircuitMapPoint] = []
+    for _, row in telemetry.iloc[::step].iterrows():
+        x = _float_or_none(row.get("X"))
+        y = _float_or_none(row.get("Y"))
+        if x is None or y is None:
+            continue
+        points.append(
+            CircuitMapPoint(
+                x=x,
+                y=y,
+                speed=_float_or_none(row.get("Speed")),
+                distance=_float_or_none(row.get("Distance")),
+            )
+        )
+
+    if len(points) < 10:
+        raise ValueError("Not enough valid FastF1 circuit coordinates to render a map")
+
+    return CircuitMapSummary(
+        season=season,
+        round=round_number,
+        raceName=str(session.event.get("EventName", f"Round {round_number}")),
+        session=session_type,
+        driver=str(fastest_lap["Driver"]),
+        points=points,
+    )
+
+
+def _enable_fastf1_cache() -> None:
+    settings = get_settings()
+    cache_dir = Path(settings.fastf1_cache_dir)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    fastf1.Cache.enable_cache(str(cache_dir))
+
+
 def _string_or_none(value: object) -> str | None:
     if value is None:
         return None
@@ -87,3 +150,11 @@ def _compound_or_none(value: object) -> str | None:
         "unknown": "Unknown",
     }
     return mapping.get(normalized, "Unknown")
+
+
+def _float_or_none(value: object) -> float | None:
+    try:
+        parsed = float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+    return parsed if isfinite(parsed) else None

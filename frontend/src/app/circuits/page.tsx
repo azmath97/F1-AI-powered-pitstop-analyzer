@@ -1,14 +1,15 @@
 "use client";
 
-import { RacingLine, SafetyCarImpactAnalysis, TrackPositionProjection } from "@/components/charts/motorsport-charts";
 import { ChartPanel } from "@/components/charts/chart-panel";
+import { RacingLine } from "@/components/charts/motorsport-charts";
 import { useRaceSelection } from "@/contexts/race-selection-context";
 import { EntityIntelligence } from "@/components/intelligence/entity-intelligence";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/states/empty-state";
 import { DataAvailability } from "@/components/strategy/data-availability";
-import { circuitIntelligence, getCircuitPointsForRace, pitWindowHeatmap, raceTimeline } from "@/lib/mock-data";
+import { useCircuitMap } from "@/hooks/use-circuit-map";
+import { circuitIntelligence } from "@/lib/mock-data";
 
 export default function CircuitsPage() {
   return (
@@ -20,29 +21,36 @@ export default function CircuitsPage() {
 
 function CircuitsContent() {
   const selection = useRaceSelection();
-  const points = getCircuitPointsForRace(selection.race.id);
+  const enabled = selection.race.status === "completed" && selection.race.round > 0;
+  const { data, isLoading, error } = useCircuitMap({
+    season: selection.season,
+    round: selection.race.round,
+    session: selection.session,
+    driver: selection.driver,
+    enabled
+  });
+
   return (
     <>
       <PageHeader title="Circuits Intelligence" eyebrow={`${selection.race.circuit} / ${selection.race.name}`} />
       <DataAvailability race={selection.race} />
       <div className="grid gap-4">
-        <ChartPanel title="Circuit Schematic" subtitle="Race-specific outline; telemetry racing line appears only after validated samples are loaded">
-          <RacingLine points={points} title={selection.race.circuit} />
-        </ChartPanel>
-        {!selection.hasValidatedTelemetry ? (
+        {!enabled ? (
           <EmptyState
-            title="No circuit telemetry loaded"
-            description="This view changes by selected race, but it will not display racing-line telemetry until validated OpenF1/FastF1 samples exist for that session."
+            title="Circuit telemetry unavailable"
+            description="Cancelled and upcoming races do not have FastF1 racing-line coordinates. The app will not draw a placeholder circuit."
+          />
+        ) : isLoading ? (
+          <div className="h-[500px] animate-pulse border border-border bg-[#111418]" />
+        ) : error || !data ? (
+          <EmptyState
+            title="FastF1 circuit map not loaded"
+            description="Start the FastAPI backend with FastF1 access for this completed session. No circular placeholder is rendered when real coordinates are missing."
           />
         ) : (
-          <div className="grid gap-4 xl:grid-cols-2">
-            <ChartPanel title="Track Position Projection">
-              <TrackPositionProjection cells={pitWindowHeatmap} />
-            </ChartPanel>
-            <ChartPanel title="Safety Car Impact Analysis">
-              <SafetyCarImpactAnalysis events={raceTimeline} />
-            </ChartPanel>
-          </div>
+          <ChartPanel title="FastF1 Racing Line" subtitle={`${data.raceName} / ${data.driver} fastest lap telemetry`}>
+            <RacingLine points={data.points} title={selection.race.circuit} />
+          </ChartPanel>
         )}
         <EntityIntelligence entities={circuitIntelligence} />
       </div>

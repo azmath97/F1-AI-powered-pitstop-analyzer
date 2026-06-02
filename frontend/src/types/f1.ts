@@ -104,6 +104,16 @@ export interface SessionSummary {
   pitStops: PitStopSummary[];
 }
 
+export interface CircuitMapSummary {
+  season: number;
+  round: number;
+  raceName: string;
+  session: string;
+  driver: string;
+  source: "fastf1" | "database";
+  points: CircuitPoint[];
+}
+
 export interface StrategyRecommendation {
   race: string;
   session: string;
