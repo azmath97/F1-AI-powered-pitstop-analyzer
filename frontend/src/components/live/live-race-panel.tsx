@@ -6,36 +6,42 @@ import type { LiveRaceSnapshot } from "@/types/f1";
 
 export function LiveRacePanel({ snapshot }: { snapshot: LiveRaceSnapshot }) {
   const driver = snapshot.selectedDriver;
-  const live = snapshot.status === "live";
+  const live = snapshot.status === "live" && driver !== null && driver !== undefined;
   return (
     <section className="border border-border bg-[#111418]">
       <div className="flex items-center justify-between border-b border-border px-3 py-2">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
           <span className={`h-2 w-2 rounded-full ${live ? "animate-pulse bg-primary" : "bg-[#2f80ed]"}`} />
-          {live ? "Live Session" : "No Live Race"}
+          {live ? "LIVE RACE" : "No Live Race"}
         </div>
         <div className="font-mono text-xs text-muted-foreground">{new Date(snapshot.updatedAt).toLocaleTimeString()}</div>
       </div>
       <div className="grid gap-0 md:grid-cols-3 xl:grid-cols-6">
-        <LiveMetric label="Lap" value={live ? `${snapshot.currentLap}/${snapshot.totalLaps}` : "Pre-race"} />
+        <LiveMetric label="Lap" value={live ? `${snapshot.currentLap}/${snapshot.totalLaps}` : "No race live"} />
         <LiveMetric label="Position" value={live ? `P${driver.position}` : "-"} />
         <LiveMetric label="Gap Ahead" value={live ? (driver.gapAhead === null ? "Leader" : `${driver.gapAhead.toFixed(1)}s`) : "-"} />
         <LiveMetric label="Tyre" value={live ? `${driver.tyreCompound} ${driver.tyreAge}L` : "-"} />
-        <LiveMetric label="Pit Rec" value={live ? `Lap ${snapshot.pitRecommendationLap}` : "-"} />
-        <LiveMetric label="Expected Gain" value={live ? `+${snapshot.expectedGainSeconds.toFixed(1)}s` : "-"} />
+        <LiveMetric label="Pit Rec" value={live && snapshot.pitRecommendationLap ? `Lap ${snapshot.pitRecommendationLap}` : "-"} />
+        <LiveMetric label="Expected Gain" value={live && snapshot.expectedGainSeconds !== null && snapshot.expectedGainSeconds !== undefined ? `+${snapshot.expectedGainSeconds.toFixed(1)}s` : "-"} />
       </div>
       <div className="grid gap-0 border-t border-border md:grid-cols-4">
-        <LiveMetric label="Undercut" value={live ? `${Math.round(snapshot.undercutProbability * 100)}%` : "-"} />
-        <LiveMetric label="Overcut" value={live ? `${Math.round(snapshot.overcutProbability * 100)}%` : "-"} />
-        <LiveMetric label="Confidence" value={live ? `${Math.round(snapshot.confidence * 100)}%` : "-"} />
+        <LiveMetric label="Undercut" value={live && snapshot.undercutProbability !== null && snapshot.undercutProbability !== undefined ? `${Math.round(snapshot.undercutProbability * 100)}%` : "-"} />
+        <LiveMetric label="Overcut" value={live && snapshot.overcutProbability !== null && snapshot.overcutProbability !== undefined ? `${Math.round(snapshot.overcutProbability * 100)}%` : "-"} />
+        <LiveMetric label="Confidence" value={live && snapshot.confidence !== null && snapshot.confidence !== undefined ? `${Math.round(snapshot.confidence * 100)}%` : "-"} />
         <LiveMetric label="Track" value={live ? `${snapshot.trackTempC.toFixed(0)}C` : "-"} />
       </div>
+      {!live && snapshot.reason ? (
+        <div className="border-t border-border px-3 py-2 text-sm text-muted-foreground">{snapshot.reason}</div>
+      ) : null}
     </section>
   );
 }
 
 export function LiveTelemetryStrip({ snapshot }: { snapshot: LiveRaceSnapshot }) {
   const driver = snapshot.selectedDriver;
+  if (!driver) {
+    return null;
+  }
   const metrics = [
     ["Speed", `${driver.speed} km/h`],
     ["Throttle", `${driver.throttle}%`],

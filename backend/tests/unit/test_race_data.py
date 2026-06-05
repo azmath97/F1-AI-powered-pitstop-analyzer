@@ -6,27 +6,41 @@ from app.schemas.race_data import CircuitMapPoint, CircuitMapSummary, PitStopSum
 
 
 def test_session_summary_route(monkeypatch) -> None:
-    def fake_summary(season: int, round_number: int, session_type: str) -> SessionSummary:
+    def fake_summary(
+        season: int,
+        round_number: int,
+        session_type: str,
+        driver: str | None,
+    ) -> SessionSummary:
+        pit_stops = [
+            PitStopSummary(driver="NOR", lap=23, stopNumber=1),
+            PitStopSummary(driver="PIA", lap=24, stopNumber=1),
+        ]
         return SessionSummary(
             season=season,
             round=round_number,
             raceName="British GP",
             session=session_type,
-            pitStops=[
-                PitStopSummary(driver="NOR", lap=23, stopNumber=1),
-                PitStopSummary(driver="PIA", lap=24, stopNumber=1),
-            ],
+            selectedDriver=driver,
+            totalPitStops=len(pit_stops),
+            driversWithPitStops=["NOR", "PIA"],
+            pitStops=pit_stops,
+            selectedDriverPitStops=[pit_stops[0]],
         )
 
     monkeypatch.setattr(race_data, "build_session_summary", fake_summary)
 
     client = TestClient(app)
-    response = client.get("/api/v1/race-data/session-summary?season=2025&round=12&session=Race")
+    response = client.get(
+        "/api/v1/race-data/session-summary?season=2025&round=12&session=Race&driver=NOR"
+    )
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["raceName"] == "British GP"
     assert len(payload["pitStops"]) == 2
+    assert payload["selectedDriver"] == "NOR"
+    assert payload["selectedDriverPitStops"][0]["driver"] == "NOR"
 
 
 def test_circuit_map_route(monkeypatch) -> None:

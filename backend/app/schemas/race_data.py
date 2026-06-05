@@ -19,7 +19,11 @@ class SessionSummary(BaseModel):
     raceName: str
     session: str
     source: Literal["fastf1", "database"] = "fastf1"
+    selectedDriver: str | None = None
+    totalPitStops: int = Field(ge=0, default=0)
+    driversWithPitStops: list[str] = Field(default_factory=list)
     pitStops: list[PitStopSummary]
+    selectedDriverPitStops: list[PitStopSummary] = Field(default_factory=list)
 
 
 class CircuitMapPoint(BaseModel):

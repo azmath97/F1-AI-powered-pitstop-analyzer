@@ -8,6 +8,7 @@ import {
   GitCompare,
   LayoutDashboard,
   Moon,
+  RadioTower,
   Route,
   Sun,
   TimerReset
@@ -24,6 +25,7 @@ import type { RaceStatus } from "@/types/f1";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/live", label: "LIVE", icon: RadioTower },
   { href: "/race-analysis", label: "Race Brief", icon: Flag },
   { href: "/race-replay", label: "Pit Stops", icon: ClipboardList },
   { href: "/tyres", label: "Tyres", icon: Gauge },
@@ -59,10 +61,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [light]);
 
   useEffect(() => {
-    setRaceId(defaultRace.id);
+    const seasonRaces = getRacesForSeason(season);
+    const nextDefaultRace = getNextRaceForSeason(season) ?? seasonRaces[0] ?? raceCatalogue[0];
+    setRaceId(nextDefaultRace.id);
     setDriver(getDriversForSeason(season)[0] ?? "NOR");
-    setSession(defaultRace.sessions.at(-1) ?? "Race");
-  }, [defaultRace.id, defaultRace.sessions, season]);
+    setSession(nextDefaultRace.sessions.at(-1) ?? "Race");
+  }, [season]);
+
+  useEffect(() => {
+    if (!selectedRace.sessions.includes(session)) {
+      setSession(selectedRace.sessions.at(-1) ?? "Race");
+    }
+  }, [selectedRace.id, session]);
 
   return (
     <RaceSelectionProvider value={selection}>

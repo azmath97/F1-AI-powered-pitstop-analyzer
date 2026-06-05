@@ -14,23 +14,34 @@ from app.schemas.race_data import (
 )
 
 
-def build_session_summary(season: int, round_number: int, session_type: str) -> SessionSummary:
+def build_session_summary(
+    season: int,
+    round_number: int,
+    session_type: str,
+    driver: str | None = None,
+) -> SessionSummary:
     _enable_fastf1_cache()
-    session = fastf1.get_session(season, round_number, session_type)
+    session_identifier = _fastf1_session_identifier(session_type)
+    session = fastf1.get_session(season, round_number, session_identifier)
     session.load(laps=True, telemetry=False, weather=False, messages=False)
     laps = session.laps
-    pit_rows = laps[laps["PitInTime"].notna() | laps["PitOutTime"].notna()].copy()
+    strategy_session = _is_strategy_session(session_type)
+    pit_rows = (
+        laps[laps["PitInTime"].notna() | laps["PitOutTime"].notna()].copy()
+        if strategy_session
+        else laps.head(0).copy()
+    )
 
     pit_stops: list[PitStopSummary] = []
     stop_counts: dict[str, int] = {}
     pending_in_laps: dict[str, dict[str, object]] = {}
     for _, row in pit_rows.sort_values(["Driver", "LapNumber"]).iterrows():
-        driver = str(row["Driver"])
+        row_driver = str(row["Driver"])
         has_pit_in = _string_or_none(row.get("PitInTime")) is not None
         has_pit_out = _string_or_none(row.get("PitOutTime")) is not None
 
         if has_pit_in:
-            pending_in_laps[driver] = {
+            pending_in_laps[row_driver] = {
                 "lap": int(row["LapNumber"]),
                 "compound": _compound_or_none(row.get("Compound")),
                 "pit_in_time": _string_or_none(row.get("PitInTime")),
@@ -39,13 +50,13 @@ def build_session_summary(season: int, round_number: int, session_type: str) -> 
         if not has_pit_out:
             continue
 
-        pending = pending_in_laps.pop(driver, None)
-        stop_counts[driver] = stop_counts.get(driver, 0) + 1
+        pending = pending_in_laps.pop(row_driver, None)
+        stop_counts[row_driver] = stop_counts.get(row_driver, 0) + 1
         pit_stops.append(
             PitStopSummary(
-                driver=driver,
+                driver=row_driver,
                 lap=int(pending["lap"]) if pending else int(row["LapNumber"]),
-                stopNumber=stop_counts[driver],
+                stopNumber=stop_counts[row_driver],
                 compoundBefore=(
                     str(pending["compound"]) if pending and pending["compound"] else None
                 ),
@@ -55,12 +66,21 @@ def build_session_summary(season: int, round_number: int, session_type: str) -> 
             )
         )
 
+    selected_driver = driver.upper() if driver else None
+    selected_driver_pit_stops = [
+        stop for stop in pit_stops if selected_driver is not None and stop.driver == selected_driver
+    ]
+
     return SessionSummary(
         season=season,
         round=round_number,
         raceName=str(session.event.get("EventName", f"Round {round_number}")),
         session=session_type,
+        selectedDriver=selected_driver,
+        totalPitStops=len(pit_stops),
+        driversWithPitStops=sorted({stop.driver for stop in pit_stops}),
         pitStops=pit_stops,
+        selectedDriverPitStops=selected_driver_pit_stops,
     )
 
 
@@ -150,6 +170,31 @@ def _compound_or_none(value: object) -> str | None:
         "unknown": "Unknown",
     }
     return mapping.get(normalized, "Unknown")
+
+
+def _is_strategy_session(session_type: str) -> bool:
+    normalized = session_type.strip().lower()
+    return normalized in {"race", "sprint"}
+
+
+def _fastf1_session_identifier(session_type: str) -> str:
+    normalized = session_type.strip().lower()
+    mapping = {
+        "practice": "FP1",
+        "practice 1": "FP1",
+        "fp1": "FP1",
+        "practice 2": "FP2",
+        "fp2": "FP2",
+        "practice 3": "FP3",
+        "fp3": "FP3",
+        "qualifying": "Q",
+        "q": "Q",
+        "race": "R",
+        "r": "R",
+        "sprint": "S",
+        "s": "S",
+    }
+    return mapping.get(normalized, session_type)
 
 
 def _float_or_none(value: object) -> float | None:

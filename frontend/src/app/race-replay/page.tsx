@@ -23,6 +23,7 @@ function RaceReplayContent() {
     season: selection.season,
     round: selection.race.round,
     session: selection.session,
+    driver: selection.driver,
     enabled
   });
 
@@ -45,7 +46,18 @@ function RaceReplayContent() {
           />
         ) : (
           <>
-            <PitStopTable pitStops={data.pitStops} season={selection.season} />
+            <PitStopTable
+              pitStops={data.selectedDriverPitStops}
+              season={selection.season}
+              selectedDriver={selection.driver}
+              title={`${selection.driver} Pit Stops`}
+            />
+            <PitStopTable
+              pitStops={data.pitStops}
+              season={selection.season}
+              selectedDriver={selection.driver}
+              title="Full Race Pit Stop Log"
+            />
             <EmptyState
               title="Tyre-stint detail waiting for ETL"
               description="Store compact lap, compound, tyre age, pit-cycle gap, and stint records next. Full replay position data is no longer part of the core workflow."

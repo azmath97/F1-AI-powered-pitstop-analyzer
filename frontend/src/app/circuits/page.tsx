@@ -3,13 +3,11 @@
 import { ChartPanel } from "@/components/charts/chart-panel";
 import { RacingLine } from "@/components/charts/motorsport-charts";
 import { useRaceSelection } from "@/contexts/race-selection-context";
-import { EntityIntelligence } from "@/components/intelligence/entity-intelligence";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/states/empty-state";
 import { DataAvailability } from "@/components/strategy/data-availability";
 import { useCircuitMap } from "@/hooks/use-circuit-map";
-import { circuitIntelligence } from "@/lib/mock-data";
 
 export default function CircuitsPage() {
   return (
@@ -52,7 +50,6 @@ function CircuitsContent() {
             <RacingLine points={data.points} title={selection.race.circuit} />
           </ChartPanel>
         )}
-        <EntityIntelligence entities={circuitIntelligence} />
       </div>
     </>
   );

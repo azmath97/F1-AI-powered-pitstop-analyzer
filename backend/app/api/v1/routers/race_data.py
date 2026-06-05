@@ -11,9 +11,10 @@ async def get_session_summary(
     season: int = Query(ge=2018),
     round_number: int = Query(alias="round", gt=0),
     session: str = Query(default="Race"),
+    driver: str | None = Query(default=None, min_length=2, max_length=3),
 ) -> SessionSummary:
     try:
-        return build_session_summary(season, round_number, session)
+        return build_session_summary(season, round_number, session, driver)
     except Exception as exc:
         detail = (
             "FastF1 session data is not available for "

@@ -1,40 +1,45 @@
 "use client";
 
-import { ChartPanel } from "@/components/charts/chart-panel";
-import { downloadCsv } from "@/components/charts/plotly-chart";
-import {
-  CompoundComparisonChart,
-  ProbabilityGauge,
-  TyreDegradationCurve
-} from "@/components/charts/motorsport-charts";
+import { useRaceSelection } from "@/contexts/race-selection-context";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { compounds, tyreCurve } from "@/lib/mock-data";
+import { EmptyState } from "@/components/states/empty-state";
+import { DataAvailability } from "@/components/strategy/data-availability";
 
 export default function TyresPage() {
   return (
     <AppShell>
-      <PageHeader title="Tyre Analytics" eyebrow="Degradation and life prediction" />
-      <div className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
-        <ChartPanel title="Tyre Degradation Curve" onCsv={() => downloadCsv("tyre-degradation.csv", tyreCurve)}>
-          <TyreDegradationCurve points={tyreCurve} />
-        </ChartPanel>
-        <div className="grid gap-4">
-          <ChartPanel title="Tyre Health Gauge">
-            <ProbabilityGauge title="Health" value={0.43} />
-          </ChartPanel>
-          <div className="border border-border bg-[#111418] p-4">
-            <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Remaining Life</div>
-            <div className="metric-font mt-2 text-4xl font-semibold">6.5 LAPS</div>
-            <div className="mt-2 text-sm text-muted-foreground">LightGBM RUL prediction target</div>
-          </div>
-        </div>
-      </div>
-      <div className="mt-4">
-        <ChartPanel title="Compound Comparison" onCsv={() => downloadCsv("compound-comparison.csv", compounds)}>
-          <CompoundComparisonChart compounds={compounds} />
-        </ChartPanel>
-      </div>
+      <TyresContent />
     </AppShell>
+  );
+}
+
+function TyresContent() {
+  const selection = useRaceSelection();
+  return (
+    <>
+      <PageHeader title="Tyre Stint & Degradation" eyebrow={`${selection.race.name} / ${selection.driver}`} />
+      <DataAvailability race={selection.race} />
+      <section className="grid gap-4 xl:grid-cols-3">
+        <FocusPanel title="Tyre Age" body="Uses compact lap and stint records: compound, lap start, lap end, pit-in lap, and pit-out lap." />
+        <FocusPanel title="Degradation" body="Requires verified lap pace by stint after fuel, traffic, weather, and safety-car context are normalized." />
+        <FocusPanel title="Remaining Life" body="Disabled until the LightGBM RUL model has trained artifacts and real feature rows for this race/driver." />
+      </section>
+      <div className="mt-4">
+        <EmptyState
+          title="Tyre model data not loaded"
+          description="No static degradation curve is shown. Run the pit-stop/stint ETL and model training before tyre health, compound comparison, or remaining-life predictions appear."
+        />
+      </div>
+    </>
+  );
+}
+
+function FocusPanel({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="border border-border bg-[#111418] p-4">
+      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{title}</div>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">{body}</p>
+    </div>
   );
 }

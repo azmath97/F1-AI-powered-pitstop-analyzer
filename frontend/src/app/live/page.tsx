@@ -2,56 +2,44 @@
 
 import { ChartPanel } from "@/components/charts/chart-panel";
 import { downloadCsv } from "@/components/charts/plotly-chart";
-import {
-  LivePositionTracker,
-  PitWindowHeatmap,
-  StrategyConfidenceBands,
-  TrackPositionProjection
-} from "@/components/charts/motorsport-charts";
+import { LivePositionTracker } from "@/components/charts/motorsport-charts";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { LiveRacePanel, LiveTelemetryStrip } from "@/components/live/live-race-panel";
 import { EmptyState } from "@/components/states/empty-state";
 import { useLiveRace } from "@/hooks/use-live-race";
-import { pitWindowHeatmap } from "@/lib/mock-data";
 
 export default function LiveRacePage() {
-  const { data: snapshot, isLoading } = useLiveRace();
+  const { data: snapshot, isLoading, error } = useLiveRace();
 
   return (
     <AppShell>
-      <PageHeader title="Live Race Mode" eyebrow="OpenF1 live data polling">
+      <PageHeader title="LIVE" eyebrow="Race session only">
         <div className="font-mono text-xs text-muted-foreground">REFRESH: 5S / SOURCE: OPENF1</div>
       </PageHeader>
       {isLoading || !snapshot ? (
         <div className="h-96 animate-pulse border border-border bg-[#111418]" />
+      ) : error ? (
+        <EmptyState
+          title="Live race status unavailable"
+          description="The backend could not reach OpenF1. StintSync will not show fallback live race data."
+        />
       ) : (
         <div className="grid gap-4">
           <LiveRacePanel snapshot={snapshot} />
           {snapshot.status !== "live" ? (
             <EmptyState
               title="No race is live"
-              description="OpenF1 live telemetry panels stay disabled until an active session is detected. Upcoming races should not show speed, throttle, brake, gaps, or pit calls."
+              description="LIVE only opens during an active Grand Prix Race session. Practice, qualifying, sprint sessions, upcoming races, and finished races stay hidden here."
             />
           ) : (
             <>
               <LiveTelemetryStrip snapshot={snapshot} />
-              <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-                <ChartPanel title="Live Position Tracker" subtitle="Track map with leader and selected-driver emphasis" onCsv={() => downloadCsv("live-position.csv", snapshot.drivers)}>
+              <div className="grid gap-4">
+                <ChartPanel title="Live Position Tracker" subtitle="OpenF1 Race session positions" onCsv={() => downloadCsv("live-position.csv", snapshot.drivers)}>
                   <LivePositionTracker drivers={snapshot.drivers} />
                 </ChartPanel>
-                <div className="grid gap-4">
-                  <ChartPanel title="Track Position Projection" onCsv={() => downloadCsv("track-projection.csv", pitWindowHeatmap)}>
-                    <TrackPositionProjection cells={pitWindowHeatmap} />
-                  </ChartPanel>
-                  <ChartPanel title="Strategy Confidence Bands" onCsv={() => downloadCsv("confidence-bands.csv", pitWindowHeatmap)}>
-                    <StrategyConfidenceBands cells={pitWindowHeatmap} />
-                  </ChartPanel>
-                </div>
               </div>
-              <ChartPanel title="Pit Window Heatmap" subtitle="Live pit lap optimization surface">
-                <PitWindowHeatmap cells={pitWindowHeatmap} height={520} />
-              </ChartPanel>
             </>
           )}
         </div>

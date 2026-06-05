@@ -23,6 +23,7 @@ function RaceAnalysisContent() {
     season: selection.season,
     round: selection.race.round,
     session: selection.session,
+    driver: selection.driver,
     enabled
   });
 
@@ -76,7 +77,20 @@ function RaceAnalysisContent() {
       ) : (
         <>
           <div className="mt-4">
-            <PitStopTable pitStops={data.pitStops} season={selection.season} />
+            <DriverPitStopFocus
+              driver={selection.driver}
+              pitStops={data.selectedDriverPitStops}
+              totalPitStops={data.totalPitStops}
+              driversWithPitStops={data.driversWithPitStops}
+            />
+          </div>
+          <div className="mt-4">
+            <PitStopTable
+              pitStops={data.pitStops}
+              season={selection.season}
+              selectedDriver={selection.driver}
+              title="Race Pit Stop Log"
+            />
           </div>
           <div className="mt-4">
             <EmptyState
@@ -114,5 +128,31 @@ function BriefPanel({ title, body }: { title: string; body: string }) {
       <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{title}</div>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">{body}</p>
     </div>
+  );
+}
+
+function DriverPitStopFocus({
+  driver,
+  pitStops,
+  totalPitStops,
+  driversWithPitStops
+}: {
+  driver: string;
+  pitStops: { lap: number; stopNumber: number; compoundBefore?: string | null; compoundAfter?: string | null }[];
+  totalPitStops: number;
+  driversWithPitStops: string[];
+}) {
+  return (
+    <section className="grid gap-3 border border-border bg-[#111418] p-4 md:grid-cols-4">
+      <BriefMetric label="Selected Driver" value={driver} />
+      <BriefMetric label="Driver Stops" value={`${pitStops.length}`} tone={pitStops.length > 0 ? "green" : "blue"} />
+      <BriefMetric label="Race Stops" value={`${totalPitStops}`} />
+      <BriefMetric label="Drivers Stopped" value={`${driversWithPitStops.length}`} />
+      <div className="text-sm text-muted-foreground md:col-span-4">
+        {pitStops.length > 0
+          ? pitStops.map((stop) => `Stop ${stop.stopNumber}: lap ${stop.lap}, ${stop.compoundBefore ?? "Unknown"} to ${stop.compoundAfter ?? "Unknown"}`).join(" | ")
+          : "No verified race pit stops for this selected driver/session."}
+      </div>
+    </section>
   );
 }

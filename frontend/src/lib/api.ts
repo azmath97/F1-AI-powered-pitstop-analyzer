@@ -1,7 +1,6 @@
 import axios from "axios";
 import { z } from "zod";
 
-import { liveSnapshot } from "@/lib/mock-data";
 import type { CircuitMapSummary, LiveRaceSnapshot, SessionSummary } from "@/types/f1";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -48,29 +47,23 @@ export async function postTyped<TResponse>(
 }
 
 export async function getLiveRaceSnapshot(): Promise<LiveRaceSnapshot> {
-  try {
-    const response = await api.get("/api/v1/live/session");
-    return liveRaceSnapshotSchema.parse(response.data);
-  } catch {
-    return {
-      ...liveSnapshot,
-      updatedAt: new Date().toISOString(),
-      currentLap: liveSnapshot.currentLap + (new Date().getSeconds() % 3)
-    };
-  }
+  const response = await api.get("/api/v1/live/session");
+  return liveRaceSnapshotSchema.parse(response.data);
 }
 
 export async function getSessionSummary({
   season,
   round,
-  session
+  session,
+  driver
 }: {
   season: number;
   round: number;
   session: string;
+  driver: string;
 }): Promise<SessionSummary> {
   const response = await api.get("/api/v1/race-data/session-summary", {
-    params: { season, round, session }
+    params: { season, round, session, driver }
   });
   return sessionSummarySchema.parse(response.data);
 }
@@ -117,22 +110,24 @@ const liveRaceSnapshotSchema = z.object({
   sessionKey: z.string(),
   race: z.string(),
   session: z.string(),
+  sessionType: z.string().optional().nullable(),
   status: z.enum(["live", "upcoming", "completed", "cancelled"]),
   currentLap: z.number(),
   totalLaps: z.number(),
   trackTempC: z.number(),
   airTempC: z.number(),
   rainfall: z.number(),
-  leader: z.string(),
-  selectedDriver: liveDriverStateSchema,
+  leader: z.string().optional().nullable(),
+  selectedDriver: liveDriverStateSchema.optional().nullable(),
   drivers: z.array(liveDriverStateSchema),
-  pitRecommendationLap: z.number(),
-  undercutProbability: z.number(),
-  overcutProbability: z.number(),
-  expectedGainSeconds: z.number(),
-  confidence: z.number(),
-  risk: z.number(),
-  updatedAt: z.string()
+  pitRecommendationLap: z.number().optional().nullable(),
+  undercutProbability: z.number().optional().nullable(),
+  overcutProbability: z.number().optional().nullable(),
+  expectedGainSeconds: z.number().optional().nullable(),
+  confidence: z.number().optional().nullable(),
+  risk: z.number().optional().nullable(),
+  updatedAt: z.string(),
+  reason: z.string().optional().nullable()
 });
 
 const pitStopSummarySchema = z.object({
@@ -151,7 +146,11 @@ const sessionSummarySchema = z.object({
   raceName: z.string(),
   session: z.string(),
   source: z.enum(["fastf1", "database"]),
-  pitStops: z.array(pitStopSummarySchema)
+  selectedDriver: z.string().optional().nullable(),
+  totalPitStops: z.number(),
+  driversWithPitStops: z.array(z.string()),
+  pitStops: z.array(pitStopSummarySchema),
+  selectedDriverPitStops: z.array(pitStopSummarySchema)
 });
 
 const circuitMapPointSchema = z.object({

@@ -1,25 +1,15 @@
-import { GapEvolutionChart, StrategyConfidenceBands } from "@/components/charts/motorsport-charts";
-import { ChartPanel } from "@/components/charts/chart-panel";
-import { EntityIntelligence } from "@/components/intelligence/entity-intelligence";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { pitWindowHeatmap, replayFrames, teamIntelligence } from "@/lib/mock-data";
+import { EmptyState } from "@/components/states/empty-state";
 
 export default function TeamsPage() {
   return (
     <AppShell>
-      <PageHeader title="Teams Intelligence" eyebrow="Constructor operations and strategy profile" />
-      <div className="grid gap-4">
-        <ChartPanel title="Strategy Confidence Bands">
-          <StrategyConfidenceBands cells={pitWindowHeatmap} />
-        </ChartPanel>
-        <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
-          <ChartPanel title="Gap Evolution">
-            <GapEvolutionChart frames={replayFrames} />
-          </ChartPanel>
-          <EntityIntelligence entities={teamIntelligence} />
-        </div>
-      </div>
+      <PageHeader title="Teams" eyebrow="De-scoped route" />
+      <EmptyState
+        title="Team analytics moved out of scope"
+        description="The active product now focuses on pit stops, tyre stints, undercut, overcut, and simulation. No static team strategy charts are shown."
+      />
     </AppShell>
   );
 }

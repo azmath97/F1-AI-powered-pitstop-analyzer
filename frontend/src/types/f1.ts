@@ -58,22 +58,24 @@ export interface LiveRaceSnapshot {
   sessionKey: string;
   race: string;
   session: string;
+  sessionType?: string | null;
   status: RaceStatus;
   currentLap: number;
   totalLaps: number;
   trackTempC: number;
   airTempC: number;
   rainfall: number;
-  leader: string;
-  selectedDriver: LiveDriverState;
+  leader?: string | null;
+  selectedDriver?: LiveDriverState | null;
   drivers: LiveDriverState[];
-  pitRecommendationLap: number;
-  undercutProbability: number;
-  overcutProbability: number;
-  expectedGainSeconds: number;
-  confidence: number;
-  risk: number;
+  pitRecommendationLap?: number | null;
+  undercutProbability?: number | null;
+  overcutProbability?: number | null;
+  expectedGainSeconds?: number | null;
+  confidence?: number | null;
+  risk?: number | null;
   updatedAt: string;
+  reason?: string | null;
 }
 
 export interface ReplayFrame {
@@ -101,7 +103,11 @@ export interface SessionSummary {
   raceName: string;
   session: string;
   source: "fastf1" | "database";
+  selectedDriver?: string | null;
+  totalPitStops: number;
+  driversWithPitStops: string[];
   pitStops: PitStopSummary[];
+  selectedDriverPitStops: PitStopSummary[];
 }
 
 export interface CircuitMapSummary {
