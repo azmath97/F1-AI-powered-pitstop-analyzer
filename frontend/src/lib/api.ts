@@ -7,7 +7,7 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:800
 
 export const api = axios.create({
   baseURL: apiBaseUrl,
-  timeout: 15_000,
+  timeout: 30_000,
   headers: {
     "Content-Type": "application/json"
   }
@@ -63,7 +63,8 @@ export async function getSessionSummary({
   driver: string;
 }): Promise<SessionSummary> {
   const response = await api.get("/api/v1/race-data/session-summary", {
-    params: { season, round, session, driver }
+    params: { season, round, session, driver },
+    timeout: 120_000
   });
   return sessionSummarySchema.parse(response.data);
 }
@@ -80,9 +81,27 @@ export async function getCircuitMap({
   driver: string;
 }): Promise<CircuitMapSummary> {
   const response = await api.get("/api/v1/race-data/circuit-map", {
-    params: { season, round, session, driver }
+    params: { season, round, session, driver },
+    timeout: 120_000
   });
   return circuitMapSummarySchema.parse(response.data);
+}
+
+export function getApiErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const detail = error.response?.data?.detail;
+    if (typeof detail === "string") {
+      return detail;
+    }
+    if (error.code === "ECONNABORTED") {
+      return "The backend is still loading the FastF1 session. Try again after the first cache warm-up finishes.";
+    }
+    if (!error.response) {
+      return "The FastAPI backend is not reachable from the frontend.";
+    }
+    return `API request failed with status ${error.response.status}.`;
+  }
+  return error instanceof Error ? error.message : "Unknown API error.";
 }
 
 const liveDriverStateSchema = z.object({

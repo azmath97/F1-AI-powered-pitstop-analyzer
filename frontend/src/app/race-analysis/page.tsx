@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/states/empty-state";
 import { DataAvailability } from "@/components/strategy/data-availability";
 import { PitStopTable } from "@/components/strategy/pit-stop-table";
+import { getApiErrorMessage } from "@/lib/api";
 
 export default function RaceAnalysisPage() {
   return (
@@ -71,7 +72,7 @@ function RaceAnalysisContent() {
         <div className="mt-4">
           <EmptyState
             title="FastF1 pit-stop data not loaded"
-            description="Start the FastAPI backend on port 8000 and ensure FastF1 can access/cache this completed race. The app will not show substitute race-analysis data."
+            description={getApiErrorMessage(error)}
           />
         </div>
       ) : (

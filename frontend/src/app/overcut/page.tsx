@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/states/empty-state";
 import { DataAvailability } from "@/components/strategy/data-availability";
 import { PitStopTable } from "@/components/strategy/pit-stop-table";
 import { StrategyExplainer } from "@/components/strategy/strategy-explainer";
+import { getApiErrorMessage } from "@/lib/api";
 
 export default function OvercutPage() {
   return (
@@ -46,7 +47,7 @@ function OvercutContent() {
         <div className="mt-4">
           <EmptyState
             title="FastF1 pit-cycle data unavailable"
-            description="Start the FastAPI backend on port 8000 and ensure FastF1 can access/cache this completed race."
+            description={getApiErrorMessage(error)}
           />
         </div>
       ) : (

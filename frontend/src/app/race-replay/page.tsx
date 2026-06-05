@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/states/empty-state";
 import { DataAvailability } from "@/components/strategy/data-availability";
 import { PitStopTable } from "@/components/strategy/pit-stop-table";
+import { getApiErrorMessage } from "@/lib/api";
 
 export default function RaceReplayPage() {
   return (
@@ -42,7 +43,7 @@ function RaceReplayContent() {
         ) : error || !data ? (
           <EmptyState
             title="FastF1 pit-stop data not loaded"
-            description="Start the FastAPI backend with FastF1 access for this completed session. Pit-stop review stays hidden until verified data is available."
+            description={getApiErrorMessage(error)}
           />
         ) : (
           <>
